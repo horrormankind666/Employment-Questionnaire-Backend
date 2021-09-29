@@ -2,10 +2,12 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๔/๐๙/๒๕๖๔>
+Modify date : <๒๙/๐๙/๒๕๖๔>
 Description : <>
 =============================================
 */
+
+'use strict';
 
 const atob = require('atob');
 const fs = require('fs');
@@ -49,12 +51,12 @@ class DB {
             let ds = await request.execute(spName);
 
             return {
-                data: ds.recordsets,
+                dataset: ds.recordsets,
                 message: 'OK'
             };
         } catch (error) {
             return {
-                data: [],
+                dataset: [],
                 message: 'Database Connection Fail'
             };
         }

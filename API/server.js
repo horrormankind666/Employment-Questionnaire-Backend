@@ -2,10 +2,12 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๓/๐๙/๒๕๖๔>
+Modify date : <๒๙/๐๙/๒๕๖๔>
 Description : <>
 =============================================
 */
+
+'use strict';
 
 const cors = require('cors');
 const dotenv = require("dotenv");
