@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๒๙/๐๙/๒๕๖๔>
+Modify date : <๑๑/๑๐/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -98,8 +98,10 @@ class Schema {
             name,
             description,
             notice,
-            doneStatus,
+            showStatus,
             cancelStatus,
+            doneStatus,
+            doneDate,
             actionDate
         ) {
             this.ID = ID,
@@ -107,8 +109,10 @@ class Schema {
             this.name = name,
             this.description = description,
             this.notice = notice,
-            this.doneStatus = doneStatus,
+            this.showStatus = showStatus,
             this.cancelStatus = cancelStatus,
+            this.doneStatus = doneStatus,
+            this.doneDate= doneDate,
             this.actionDate = actionDate
         }
     }
@@ -194,6 +198,24 @@ class Schema {
             this.actionDate = actionDate
         }
     }
+
+    QuestionnaireDoneAndSet = class {
+        constructor(
+            questionnaireDone,
+            questionnaireSet,
+            questionnaireSection,
+            questionnaireQuestion,
+            questionnaireAnswerSet,
+            questionnaireAnswer
+        ) {
+            this.questionnaireDone = questionnaireDone,
+            this.questionnaireSet = questionnaireSet,
+            this.questionnaireSection = questionnaireSection,
+            this.questionnaireQuestion = questionnaireQuestion,
+            this.questionnaireAnswerSet = questionnaireAnswerSet,
+            this.questionnaireAnswer = questionnaireAnswer
+        }
+    }
 }
 
 async function getList(PPID, perPersonID, studentCode) {
@@ -231,8 +253,10 @@ async function getList(PPID, perPersonID, studentCode) {
                     en: dr.noticeEN
 
                 },
-                dr.doneStatus,
+                dr.showStatus,
                 dr.cancelStatus,
+                dr.doneStatus,
+                dr.doneDate,
                 dr.actionDate
             ));
         });
@@ -258,18 +282,17 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
 
     let data = await db.executeStoredProcedure('sp_empGetQuestionnaireDoneAndSet', connRequest);
     let ds = [];
-    let dsQuestionnaireDone = [];
-    let dsQuestionnaireSet = [];
+    let dsQuestionnaireDone = null;
+    let dsQuestionnaireSet = null;
     let dsQuestionnaireSection = [];
     let dsQuestionnaireQuestion = [];
     let dsQuestionnaireAnswerSet = [];
     let dsQuestionnaireAnswer = [];
+    let schema = new Schema();
 
     if (data.dataset.length > 0) {
-        let schema = new Schema();
-
         data.dataset[0].forEach(dr => {
-            dsQuestionnaireDone.push(new schema.QuestionnaireDone(
+            dsQuestionnaireDone = new schema.QuestionnaireDone(
                 dr.ID,
                 dr.empQuestionnaireSetID,
                 dr.PPID,
@@ -342,11 +365,11 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                 dr.empQuestionnaireAnswer,
                 dr.cancelStatus,
                 dr.actionDate
-            ));
+            );
         });
 
         data.dataset[1].forEach(dr => {
-            dsQuestionnaireSet.push(new schema.QuestionnaireSet(
+            dsQuestionnaireSet = new schema.QuestionnaireSet(
                 dr.ID,
                 dr.year,
                 {
@@ -362,10 +385,12 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                     en: dr.noticeEN
 
                 },
-                dr.doneStatus,
+                dr.showStatus,
                 dr.cancelStatus,
+                dr.doneStatus,
+                dr.doneDate,
                 dr.actionDate
-            ));
+            );
         });
 
         data.dataset[2].forEach(dr => {
@@ -439,14 +464,14 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
         });
     }
 
-    ds.push(
+    ds.push(new schema.QuestionnaireDoneAndSet(
         dsQuestionnaireDone,
         dsQuestionnaireSet,
         dsQuestionnaireSection,
         dsQuestionnaireQuestion,
         dsQuestionnaireAnswerSet,
         dsQuestionnaireAnswer
-    );
+    ));
 
     data.dataset = ds;
 

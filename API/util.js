@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๒๙/๐๙/๒๕๖๔>
+Modify date : <๑๒/๑๐/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -20,6 +20,22 @@ function getAPIMessage(statusCode, data, message) {
         data: data,
         message: (message ? message : (statusCode === 200 ? 'OK' : ''))
     };
+}
+
+function parseCUID(str) {
+    try {
+        let strDecode = atob(str);
+        let strDecodeSplit = strDecode.split('.');
+        let data = strDecodeSplit[2];
+        let dataReverse = data.split('').reverse().join('');
+        let dataReverseDecode = atob(dataReverse);
+        let dataReverseDecodeSplit = dataReverseDecode.split('.');
+
+        return dataReverseDecodeSplit;
+    }
+    catch {
+        return null;
+    }
 }
 
 class DB {
@@ -43,7 +59,8 @@ class DB {
 
             return conn.request();
         }
-        catch { }
+        catch {
+        }
     }
 
     async executeStoredProcedure(spName, request) {
@@ -65,52 +82,19 @@ class DB {
 
 class Authorization {
     ADFS = {
-        parserCUID(str) {
+        parseToken(str) {
             try {
-                /*
                 let strDecode = atob(str);
                 let strDecodeSplit = strDecode.split('.');
-                let data = strDecodeSplit[2];
-                let dataReverse = data.split('').reverse().join('');
-                let dataReverseDecode = atob(dataReverse);
-                let dataReverseDecodeSplit = dataReverseDecode.split('.');
-        
+    
                 return ({
-                    PPID: dataReverseDecodeSplit[0]
-                });
-                */
-
-                return ({
-                    PPID: '6unbq648oglyxf90ds',
-                    perPersonID: null,
-                    studentCode: null
+                    CUID: atob(strDecodeSplit[0]).split('').reverse().join(''),
+                    token: atob(strDecodeSplit[1]).split('').reverse().join('')
                 });
             }
             catch {
                 return null;
-            }
-        },
-        parserToken(str) {
-            try {
-                /*
-                let strDecode = atob(str);
-                let strDecodeSplit = strDecode.split('.');
-                let CUIDInfo = this.parserCUID(atob(strDecodeSplit[0]).split('').reverse().join(''));                
-                let tokenParse = CUIDInfo;
-
-                tokenParse.token = atob(strDecodeSplit[1]).split('').reverse().join('');
-                */
-
-                let CUIDInfo = this.parserCUID(str);
-                let tokenParse = CUIDInfo;
-
-                tokenParse.token = str;
-
-                return tokenParse;
-            }
-            catch {
-                return null;
-            }
+             }
         },
         getInfo(request) {
             let authorization = request.headers.authorization;
@@ -121,18 +105,20 @@ class Authorization {
             
             if (authorization) {
                 if (authorization.startsWith("Bearer ")) {
-                    let bearerToken = authorization.substring("Bearer ".length).trim();
-                    let bearerTokenInfo = this.parserToken(bearerToken);
-                    let publickey = fs.readFileSync(__dirname + '/public.key');
-
                     try {
+                        let bearerToken = authorization.substring("Bearer ".length).trim();
+                        let bearerTokenInfo = this.parseToken(bearerToken);
+                        let CUIDInfo = parseCUID(bearerTokenInfo.CUID);
+                        let PPID = (CUIDInfo !== null ? CUIDInfo[0] : null);
+                        let publickey = fs.readFileSync(__dirname + '/public.key');
+
                         payload = jwt.verify(bearerTokenInfo.token, publickey, { algorithms: ['RS256'] });
 
-                        if (bearerTokenInfo.PPID === payload.ppid) {
+                        if (PPID !== null && payload !== null && PPID === payload.ppid) {
                             statusCode = 200;
                             isAuthenticated = true;
-                            payload.perPersonID = bearerTokenInfo.perPersonID;
-                            payload.studentCode = bearerTokenInfo.studentCode;
+                            payload.perPersonID = '';
+                            payload.studentCode = '';
                             message = 'OK';
                         }
                         else {
@@ -175,6 +161,7 @@ class Authorization {
 
 module.exports = {
     getAPIMessage: getAPIMessage,
+    parseCUID: parseCUID,
     DB: DB,
     Authorization: Authorization
 };
