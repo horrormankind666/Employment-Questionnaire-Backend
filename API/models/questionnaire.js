@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๑๑/๑๐/๒๕๖๔>
+Modify date : <๒๑/๑๐/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -177,6 +177,7 @@ class Schema {
             empQuestionnaireAnswerSetID,
             defaultAnswerSet,
             no,
+            choiceOrder,
             name,
             description,
             inputType,
@@ -189,6 +190,7 @@ class Schema {
             this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
             this.defaultAnswerSet = defaultAnswerSet,
             this.no = no,
+            this.choiceOrder = choiceOrder,
             this.name = name,
             this.description = description,
             this.inputType = inputType,
@@ -447,6 +449,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                 dr.empQuestionnaireAnswerSetID,
                 dr.defaultAnswerSet,
                 dr.no,
+                dr.choiceOrder,
                 {
                     th: dr.nameTH,
                     en: dr.nameEN
