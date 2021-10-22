@@ -175,7 +175,6 @@ class Schema {
         constructor(
             ID,
             empQuestionnaireAnswerSetID,
-            defaultAnswerSet,
             no,
             choiceOrder,
             name,
@@ -188,7 +187,6 @@ class Schema {
         ) {
             this.ID = ID,
             this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
-            this.defaultAnswerSet = defaultAnswerSet,
             this.no = no,
             this.choiceOrder = choiceOrder,
             this.name = name,
@@ -447,7 +445,6 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
             dsQuestionnaireAnswer.push(new schema.QuestionnaireAnswer(
                 dr.ID,
                 dr.empQuestionnaireAnswerSetID,
-                dr.defaultAnswerSet,
                 dr.no,
                 dr.choiceOrder,
                 {
