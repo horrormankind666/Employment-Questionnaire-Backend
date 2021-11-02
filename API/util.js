@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๒/๑๐/๒๕๖๔>
+Modify date : <๒๗/๑๐/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -39,39 +39,64 @@ function parseCUID(str) {
 }
 
 class DB {
-    config = {
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_DATABASE,
-        server: process.env.DB_SERVER,
-        pool: {
-            idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
-        },
-        options: {
-            encrypt: true,
-            trustServerCertificate: true
-        } 
-    }
+    bermuda = { 
+        config: {
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: 'Bermuda',
+            server: process.env.DB_SERVER,
+            pool: {
+                idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
+            },
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            } 
+        }
+    };
+    infinity = {
+        config: {
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: 'Infinity',
+            server: process.env.DB_SERVER,
+            pool: {
+                idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
+            },
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            } 
+        }
+    };
 
-    async getConnectRequest() {
+    async getConnectRequest(database) {
         try {
-            let conn = await sql.connect(this.config);
+            let conn = null;
 
-            return conn.request();
+            if (database === process.env.DB_DATABASE_INFINITY)
+                conn = await sql.connect(this.infinity.config);
+            
+            if (database === process.env.DB_DATABASE_BERMUDA)
+                conn = await sql.connect(this.bermuda.config);
+                        
+            return conn;
         }
         catch {
         }
     }
 
-    async executeStoredProcedure(spName, request) {
+    async executeStoredProcedure(connRequest, spName) {
         try {
-            let ds = await request.execute(spName);
+            let ds = await connRequest.execute(spName);
 
             return {
                 dataset: ds.recordsets,
                 message: 'OK'
             };
         } catch (error) {
+            console.log(error);
+
             return {
                 dataset: [],
                 message: 'Database Connection Fail'

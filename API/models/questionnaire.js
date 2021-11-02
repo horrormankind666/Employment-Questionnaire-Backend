@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๒๑/๑๐/๒๕๖๔>
+Modify date : <๒๗/๑๐/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -161,12 +161,14 @@ class Schema {
             empQuestionnaireQuestionID,
             no,
             titleName,
+            inputType,
             actionDate
         ) {
             this.ID = ID,
             this.empQuestionnaireQuestionID = empQuestionnaireQuestionID,
             this.no = no,
             this.titleName = titleName,
+            this.inputType = inputType,
             this.actionDate = actionDate
         }
     }
@@ -180,7 +182,6 @@ class Schema {
             name,
             description,
             inputType,
-            value,
             specify,
             gotoSection,
             actionDate
@@ -192,7 +193,6 @@ class Schema {
             this.name = name,
             this.description = description,
             this.inputType = inputType,
-            this.value = value,
             this.specify = specify,
             this.gotoSection = gotoSection,
             this.actionDate = actionDate
@@ -201,36 +201,38 @@ class Schema {
 
     QuestionnaireDoneAndSet = class {
         constructor(
-            questionnaireDone,
-            questionnaireSet,
-            questionnaireSection,
-            questionnaireQuestion,
-            questionnaireAnswerSet,
-            questionnaireAnswer
+            done,
+            set,
+            section,
+            question,
+            answerSet,
+            answer
         ) {
-            this.questionnaireDone = questionnaireDone,
-            this.questionnaireSet = questionnaireSet,
-            this.questionnaireSection = questionnaireSection,
-            this.questionnaireQuestion = questionnaireQuestion,
-            this.questionnaireAnswerSet = questionnaireAnswerSet,
-            this.questionnaireAnswer = questionnaireAnswer
+            this.done = done,
+            this.set = set,
+            this.section = section,
+            this.question = question,
+            this.answerSet = answerSet,
+            this.answer = answer
         }
     }
 }
 
 async function getList(PPID, perPersonID, studentCode) {
     let db = new util.DB();
+    let conn;
     let connRequest;
     
     try {
-        connRequest = await db.getConnectRequest();
+        conn = await db.getConnectRequest(process.env.DB_DATABASE_BERMUDA);
+        connRequest = conn.request();
         connRequest.input('PPID', sql.VarChar, PPID);
         connRequest.input('perPersonID', sql.VarChar, perPersonID);
         connRequest.input('studentCode', sql.VarChar, studentCode);
     }
     catch { }
     
-    let data = await db.executeStoredProcedure('sp_empGetListQuestionnaireDoneAndSet', connRequest);
+    let data = await db.executeStoredProcedure(connRequest, 'sp_empGetListQuestionnaireDoneAndSet');
     let ds = [];
 
     if (data.dataset.length > 0) {
@@ -263,16 +265,19 @@ async function getList(PPID, perPersonID, studentCode) {
     }
 
     data.dataset = ds;
+    conn.close();
 
     return data;
 }
 
 async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
     let db = new util.DB(); 
+    let conn;
     let connRequest;
 
     try {
-        connRequest = await db.getConnectRequest();
+        conn = await db.getConnectRequest(process.env.DB_DATABASE_BERMUDA);
+        connRequest = conn.request();
         connRequest.input('PPID', sql.VarChar, PPID);
         connRequest.input('perPersonID', sql.VarChar, perPersonID);
         connRequest.input('studentCode', sql.VarChar, studentCode);
@@ -280,7 +285,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
     }
     catch { }
 
-    let data = await db.executeStoredProcedure('sp_empGetQuestionnaireDoneAndSet', connRequest);
+    let data = await db.executeStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
     let ds = [];
     let dsQuestionnaireDone = null;
     let dsQuestionnaireSet = null;
@@ -437,6 +442,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                     th: dr.titleNameTH,
                     en: dr.titleNameEN
                 },
+                JSON.parse(dr.inputType),
                 dr.actionDate
             ));
         });
@@ -455,8 +461,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                     th: dr.descriptionTH,
                     en: dr.descriptionEN
                 },
-                dr.inputType,
-                dr.value,
+                JSON.parse(dr.inputType),
                 JSON.parse(dr.specify),
                 dr.gotoSection,
                 dr.actionDate
@@ -474,6 +479,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
     ));
 
     data.dataset = ds;
+    conn.close();
 
     return data;
 }
