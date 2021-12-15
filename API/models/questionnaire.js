@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๒๗/๑๐/๒๕๖๔>
+Modify date : <๐๘/๑๒/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -124,6 +124,7 @@ class Schema {
             no,
             titleName,
             name,
+            disableStatus,
             actionDate
         ) {
             this.ID = ID,
@@ -131,6 +132,7 @@ class Schema {
             this.no = no,
             this.titleName = titleName,
             this.name = name,
+            this.disableStatus = disableStatus,
             this.actionDate = actionDate
         }
     }
@@ -183,7 +185,7 @@ class Schema {
             description,
             inputType,
             specify,
-            gotoSection,
+            sectionOnOff,
             actionDate
         ) {
             this.ID = ID,
@@ -194,7 +196,7 @@ class Schema {
             this.description = description,
             this.inputType = inputType,
             this.specify = specify,
-            this.gotoSection = gotoSection,
+            this.sectionOnOff = sectionOnOff,
             this.actionDate = actionDate
         }
     }
@@ -411,6 +413,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                     th: dr.nameTH,
                     en: dr.nameEN
                 },
+                dr.disableStatus,
                 dr.actionDate
             ));
         });
@@ -463,7 +466,7 @@ async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
                 },
                 JSON.parse(dr.inputType),
                 JSON.parse(dr.specify),
-                dr.gotoSection,
+                JSON.parse(dr.sectionOnOff),
                 dr.actionDate
             ));
         });
