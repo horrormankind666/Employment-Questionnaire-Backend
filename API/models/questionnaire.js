@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๐๘/๑๒/๒๕๖๔>
+Modify date : <๐๘/๐๑/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -17,75 +17,49 @@ class Schema {
         constructor(
             ID,
             empQuestionnaireSetID,
-            PPID,
-            perPersonID,
-            studentCode,
-            titlePrefix,
-            firstName,
-            middleName,
-            lastName,
-            instituteName,
-            facultyID,
-            facultyCode,
-            facultyName,
-            programID,
-            programCode,
-            majorCode,
-            groupNum,
-            degreeLevelName,
-            programName,
-            degreeName,
-            branchID,
-            branchName,
-            classYear,
-            yearEntry,
-            gender,
-            birthDate,
-            nationalityName,
-            nationality2Letter,
-            nationality3Letter,
-            raceName,
-            race2Letter,
-            race3Letter,
-            address,
+            userInfo = {
+                PPID,
+                perPersonID,
+                studentCode,
+                IDCard,
+                titlePrefix,
+                firstName,
+                middleName,
+                lastName,
+                instituteName,
+                facultyID,
+                facultyCode,
+                facultyName,
+                programID,
+                programCode,
+                majorCode,
+                groupNum,
+                degreeLevelName,
+                programName,
+                degreeName,
+                branchID,
+                branchName,
+                classYear,
+                yearEntry,
+                gender,
+                birthDate,
+                nationalityName,
+                nationality2Letter,
+                nationality3Letter,
+                raceName,
+                race2Letter,
+                race3Letter
+            },
             empQuestionnaireAnswer,
+            submitStatus,
             cancelStatus,
             actionDate
         ) {
             this.ID = ID,
             this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.PPID = PPID,
-            this.perPersonID = perPersonID,
-            this.studentCode = studentCode,
-            this.titlePrefix = titlePrefix,
-            this.firstName = firstName,
-            this.middleName = middleName,
-            this.lastName = lastName,
-            this.instituteName = instituteName,
-            this.facultyID = facultyID,
-            this.facultyCode = facultyCode,
-            this.facultyName = facultyName,
-            this.programID = programID,
-            this.programCode = programCode,
-            this.majorCode = majorCode,
-            this.groupNum = groupNum,
-            this.degreeLevelName = degreeLevelName,
-            this.programName = programName,
-            this.degreeName = degreeName,
-            this.branchID = branchID,
-            this.branchName = branchName,
-            this.classYear = classYear,
-            this.yearEntry = yearEntry,
-            this.gender = gender,
-            this.birthDate = birthDate,
-            this.nationalityName = nationalityName,
-            this.nationality2Letter = nationality2Letter,
-            this.nationality3Letter = nationality3Letter,
-            this.raceName = raceName,
-            this.race2Letter = race2Letter,
-            this.race3Letter = race3Letter,
-            this.address = address,
+            this.userInfo = userInfo,            
             this.empQuestionnaireAnswer = empQuestionnaireAnswer,
+            this.submitStatus = submitStatus,
             this.cancelStatus = cancelStatus,
             this.actionDate = actionDate
         }
@@ -100,7 +74,8 @@ class Schema {
             notice,
             showStatus,
             cancelStatus,
-            doneStatus,
+            empQuestionnaireDoneID,
+            submitStatus,
             doneDate,
             actionDate
         ) {
@@ -111,7 +86,8 @@ class Schema {
             this.notice = notice,
             this.showStatus = showStatus,
             this.cancelStatus = cancelStatus,
-            this.doneStatus = doneStatus,
+            this.empQuestionnaireDoneID = empQuestionnaireDoneID,
+            this.submitStatus = submitStatus,
             this.doneDate= doneDate,
             this.actionDate = actionDate
         }
@@ -185,7 +161,7 @@ class Schema {
             description,
             inputType,
             specify,
-            sectionOnOff,
+            eventAction,
             actionDate
         ) {
             this.ID = ID,
@@ -196,7 +172,7 @@ class Schema {
             this.description = description,
             this.inputType = inputType,
             this.specify = specify,
-            this.sectionOnOff = sectionOnOff,
+            this.eventAction = eventAction,
             this.actionDate = actionDate
         }
     }
@@ -220,275 +196,316 @@ class Schema {
     }
 }
 
-async function getList(PPID, perPersonID, studentCode) {
-    let db = new util.DB();
-    let conn;
-    let connRequest;
-    
-    try {
-        conn = await db.getConnectRequest(process.env.DB_DATABASE_BERMUDA);
-        connRequest = conn.request();
-        connRequest.input('PPID', sql.VarChar, PPID);
-        connRequest.input('perPersonID', sql.VarChar, perPersonID);
-        connRequest.input('studentCode', sql.VarChar, studentCode);
-    }
-    catch { }
-    
-    let data = await db.executeStoredProcedure(connRequest, 'sp_empGetListQuestionnaireDoneAndSet');
-    let ds = [];
+class QuestionnaireDoneAndSet {
+    async doGetList(PPID) {
+        let db = new util.DB();
+        let conn;
+        let connRequest;
+        
+        try {
+            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            connRequest = conn.request();
+            connRequest.input('PPID', sql.VarChar, PPID);
+        }
+        catch {
+        }
+        
+        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empGetListQuestionnaireDoneAndSet');
+        let ds = [];
 
-    if (data.dataset.length > 0) {
+        if (data.dataset.length > 0) {
+            let schema = new Schema();
+
+            data.dataset[0].forEach(dr => {
+                ds.push(new schema.QuestionnaireSet(
+                    dr.ID,
+                    dr.year,
+                    {
+                        th: dr.nameTH,
+                        en: dr.nameEN
+                    },
+                    {
+                        th: dr.descriptionTH,
+                        en: dr.descriptionEN
+                    },
+                    {
+                        th: dr.noticeTH,
+                        en: dr.noticeEN
+
+                    },
+                    dr.showStatus,
+                    dr.cancelStatus,
+                    dr.empQuestionnaireDoneID,
+                    dr.submitStatus,
+                    dr.doneDate,
+                    dr.actionDate
+                ));
+            });
+        }
+
+        data.dataset = ds;
+        conn.close();
+
+        return data;
+    }
+
+    async doGet(
+        questionnaireDoneID,
+        questionnaireSetID,
+        PPID
+    ) {
+        let db = new util.DB(); 
+        let conn;
+        let connRequest;
+
+        try {
+            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            connRequest = conn.request();
+            connRequest.input('empQuestionnaireDoneID', sql.VarChar, questionnaireDoneID);
+            connRequest.input('empQuestionnaireSetID', sql.VarChar, questionnaireSetID);
+            connRequest.input('PPID', sql.VarChar, PPID);
+        }
+        catch {
+        }
+
+        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
+        let ds = [];
+        let dsQuestionnaireDone = null;
+        let dsQuestionnaireSet = null;
+        let dsQuestionnaireSection = [];
+        let dsQuestionnaireQuestion = [];
+        let dsQuestionnaireAnswerSet = [];
+        let dsQuestionnaireAnswer = [];
         let schema = new Schema();
 
-        data.dataset[0].forEach(dr => {
-            ds.push(new schema.QuestionnaireSet(
-                dr.ID,
-                dr.year,
-                {
-                    th: dr.nameTH,
-                    en: dr.nameEN
-                },
-                {
-                    th: dr.descriptionTH,
-                    en: dr.descriptionEN
-                },
-                {
-                    th: dr.noticeTH,
-                    en: dr.noticeEN
+        if (data.dataset.length > 0) {
+            data.dataset[0].forEach(dr => {
+                dsQuestionnaireDone = new schema.QuestionnaireDone(
+                    dr.ID,
+                    dr.empQuestionnaireSetID,
+                    {
+                        PPID: dr.PPID,
+                        perPersonID: dr.perPersonID,
+                        studentCode: dr.studentCode,
+                        IDCard: dr.IDCard,
+                        titlePrefix: {
+                            th: dr.titlePrefixTH,
+                            en: dr.titlePrefixEN
+                        },
+                        firstName: {
+                            th: dr.firstNameTH,
+                            en: dr.firstNameEN
+                        },
+                        middleName: {
+                            th: dr.middleNameTH,
+                            en: dr.middleNameEN
+                        },
+                        lastName: {
+                            th: dr.lastNameTH,
+                            en: dr.lastNameEN
+                        },
+                        instituteName: {
+                            th: dr.instituteNameTH,
+                            en: dr.instituteNameEN
+                        },
+                        facultyID: dr.facultyID,
+                        facultyCode: dr.facultyCode,
+                        facultyName: {
+                            th: dr.facultyNameTH,
+                            en: dr.facultyNameEN
+                        },
+                        programID: dr.programID,
+                        programCode: dr.programCode,
+                        majorCode: dr.majorCode,
+                        groupNum: dr.groupNum,
+                        degreeLevelName: {
+                            th: dr.degreeLevelNameTH,
+                            en: dr.degreeLevelNameEN
+                        },
+                        programName: {
+                            th: dr.programNameTH,
+                            en: dr.programNameEN
+                        },
+                        degreeName: {
+                            th: dr.degreeNameTH,
+                            en: dr.degreeNameEN
+                        },
+                        branchID: dr.branchID,
+                        branchName: {
+                            th: dr.branchNameTH,
+                            en: dr.branchNameEN
+                        },
+                        classYear: dr.class,
+                        yearEntry: dr.yearEntry,
+                        gender: dr.gender,
+                        birthDate: dr.birthDate,
+                        nationalityName: {
+                            th: dr.nationalityNameTH,
+                            en: dr.nationalityNameEN
+                        },
+                        nationality2Letter: dr.nationality2Letter,
+                        nationality3Letter: dr.nationality3Letter,
+                        raceName: {
+                            th: dr.raceNameTH,
+                            en: dr.raceNameEN
+                        },
+                        race2Letter: dr.race2Letter,
+                        race3Letter: dr.race3Letter
+                    },
+                    dr.empQuestionnaireAnswer,
+                    dr.submitStatus,
+                    dr.cancelStatus,
+                    dr.actionDate
+                );
+            });
+            
+            data.dataset[1].forEach(dr => {
+                dsQuestionnaireSet = new schema.QuestionnaireSet(
+                    dr.ID,
+                    dr.year,
+                    {
+                        th: dr.nameTH,
+                        en: dr.nameEN
+                    },
+                    {
+                        th: dr.descriptionTH,
+                        en: dr.descriptionEN
+                    },
+                    {
+                        th: dr.noticeTH,
+                        en: dr.noticeEN
 
-                },
-                dr.showStatus,
-                dr.cancelStatus,
-                dr.doneStatus,
-                dr.doneDate,
-                dr.actionDate
-            ));
-        });
+                    },
+                    dr.showStatus,
+                    dr.cancelStatus,
+                    null,
+                    null,
+                    null,
+                    dr.actionDate
+                );
+            });
+
+            data.dataset[2].forEach(dr => {
+                dsQuestionnaireSection.push(new schema.QuestionnaireSection(
+                    dr.ID,
+                    dr.empQuestionnaireSetID,
+                    dr.no,
+                    {
+                        th: dr.titleNameTH,
+                        en: dr.titleNameEN
+                    },
+                    {
+                        th: dr.nameTH,
+                        en: dr.nameEN
+                    },
+                    dr.disableStatus,
+                    dr.actionDate
+                ));
+            });
+
+            data.dataset[3].forEach(dr => {
+                dsQuestionnaireQuestion.push(new schema.QuestionnaireQuestion(
+                    dr.ID,
+                    dr.empQuestionnaireSectionID,
+                    dr.no,
+                    {
+                        th: dr.nameTH,
+                        en: dr.nameEN
+                    },
+                    {
+                        th: dr.descriptionTH,
+                        en: dr.descriptionEN
+                    },
+                    JSON.parse(dr.condition),
+                    dr.actionDate
+                ));
+            });
+
+            data.dataset[4].forEach(dr => {
+                dsQuestionnaireAnswerSet.push(new schema.QuestionnaireAnswerSet(
+                    dr.ID,
+                    dr.empQuestionnaireQuestionID,
+                    dr.no,
+                    {
+                        th: dr.titleNameTH,
+                        en: dr.titleNameEN
+                    },
+                    JSON.parse(dr.inputType),
+                    dr.actionDate
+                ));
+            });
+
+            data.dataset[5].forEach(dr => {
+                dsQuestionnaireAnswer.push(new schema.QuestionnaireAnswer(
+                    dr.ID,
+                    dr.empQuestionnaireAnswerSetID,
+                    dr.no,
+                    dr.choiceOrder,
+                    {
+                        th: dr.nameTH,
+                        en: dr.nameEN
+                    },
+                    {
+                        th: dr.descriptionTH,
+                        en: dr.descriptionEN
+                    },
+                    JSON.parse(dr.inputType),
+                    JSON.parse(dr.specify),
+                    JSON.parse(dr.eventAction),
+                    dr.actionDate
+                ));
+            });
+        }
+
+        ds.push(new schema.QuestionnaireDoneAndSet(
+            dsQuestionnaireDone,
+            dsQuestionnaireSet,
+            dsQuestionnaireSection,
+            dsQuestionnaireQuestion,
+            dsQuestionnaireAnswerSet,
+            dsQuestionnaireAnswer
+        ));
+
+        data.dataset = ds;
+        conn.close();
+
+        return data;
     }
-
-    data.dataset = ds;
-    conn.close();
-
-    return data;
 }
 
-async function get(PPID, perPersonID, studentCode, questionnaireSetID) {
-    let db = new util.DB(); 
-    let conn;
-    let connRequest;
+class QuestionnaireDone {
+    async doSet(
+        method,
+        jsonData
+    ) {
+        let db = new util.DB();
+        let conn;
+        let connRequest;
+        
+        try {
+            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            connRequest = conn.request();
+            connRequest.input('method', sql.VarChar, method);
+            connRequest.input('jsonData', sql.NVarChar, jsonData);
+        }
+        catch {
+        }
 
-    try {
-        conn = await db.getConnectRequest(process.env.DB_DATABASE_BERMUDA);
-        connRequest = conn.request();
-        connRequest.input('PPID', sql.VarChar, PPID);
-        connRequest.input('perPersonID', sql.VarChar, perPersonID);
-        connRequest.input('studentCode', sql.VarChar, studentCode);
-        connRequest.input('empQuestionnaireSetID', sql.VarChar, questionnaireSetID);
+        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empSetQuestionnaireDone');
+        let ds = [];
+
+        if (data.dataset.length > 0)
+            ds = data.dataset[0];
+
+        data.dataset = ds;
+        conn.close();
+
+        return data;
     }
-    catch { }
-
-    let data = await db.executeStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
-    let ds = [];
-    let dsQuestionnaireDone = null;
-    let dsQuestionnaireSet = null;
-    let dsQuestionnaireSection = [];
-    let dsQuestionnaireQuestion = [];
-    let dsQuestionnaireAnswerSet = [];
-    let dsQuestionnaireAnswer = [];
-    let schema = new Schema();
-
-    if (data.dataset.length > 0) {
-        data.dataset[0].forEach(dr => {
-            dsQuestionnaireDone = new schema.QuestionnaireDone(
-                dr.ID,
-                dr.empQuestionnaireSetID,
-                dr.PPID,
-                dr.perPersonID,
-                dr.studentCode,
-                {
-                    th: dr.titlePrefixTH,
-                    en: dr.titlePrefixEN
-                },
-                {
-                    th: dr.firstNameTH,
-                    en: dr.firstNameEN
-                },
-                {
-                    th: dr.middleNameTH,
-                    en: dr.middleNameEN
-                },
-                {
-                    th: dr.lastNameTH,
-                    en: dr.lastNameEN
-                },
-                {
-                    th: dr.instituteNameTH,
-                    en: dr.instituteNameEN
-                },
-                dr.facultyID,
-                dr.facultyCode,
-                {
-                    th: dr.facultyNameTH,
-                    en: dr.facultyNameEN
-                },
-                dr.programID,
-                dr.programCode,
-                dr.majorCode,
-                dr.groupNum,
-                {
-                    th: dr.degreeLevelNameTH,
-                    en: dr.degreeLevelNameEN
-                },
-                {
-                    th: dr.programNameTH,
-                    en: dr.programNameEN
-                },
-                {
-                    th: dr.degreeNameTH,
-                    en: dr.degreeNameEN
-                },
-                dr.branchID,
-                {
-                    th: dr.branchNameTH,
-                    en: dr.branchNameEN
-                },
-                dr.class,
-                dr.yearEntry,
-                dr.gender,
-                dr.birthDate,
-                {
-                    th: dr.nationalityNameTH,
-                    en: dr.nationalityNameEN
-                },
-                dr.nationality2Letter,
-                dr.nationality3Letter,
-                {
-                    th: dr.raceNameTH,
-                    en: dr.raceNameEN
-                },
-                dr.race2Letter,
-                dr.race3Letter,
-                dr.address,
-                dr.empQuestionnaireAnswer,
-                dr.cancelStatus,
-                dr.actionDate
-            );
-        });
-
-        data.dataset[1].forEach(dr => {
-            dsQuestionnaireSet = new schema.QuestionnaireSet(
-                dr.ID,
-                dr.year,
-                {
-                    th: dr.nameTH,
-                    en: dr.nameEN
-                },
-                {
-                    th: dr.descriptionTH,
-                    en: dr.descriptionEN
-                },
-                {
-                    th: dr.noticeTH,
-                    en: dr.noticeEN
-
-                },
-                dr.showStatus,
-                dr.cancelStatus,
-                dr.doneStatus,
-                dr.doneDate,
-                dr.actionDate
-            );
-        });
-
-        data.dataset[2].forEach(dr => {
-            dsQuestionnaireSection.push(new schema.QuestionnaireSection(
-                dr.ID,
-                dr.empQuestionnaireSetID,
-                dr.no,
-                {
-                    th: dr.titleNameTH,
-                    en: dr.titleNameEN
-                },
-                {
-                    th: dr.nameTH,
-                    en: dr.nameEN
-                },
-                dr.disableStatus,
-                dr.actionDate
-            ));
-        });
-
-        data.dataset[3].forEach(dr => {
-            dsQuestionnaireQuestion.push(new schema.QuestionnaireQuestion(
-                dr.ID,
-                dr.empQuestionnaireSectionID,
-                dr.no,
-                {
-                    th: dr.nameTH,
-                    en: dr.nameEN
-                },
-                {
-                    th: dr.descriptionTH,
-                    en: dr.descriptionEN
-                },
-                JSON.parse(dr.condition),
-                dr.actionDate
-            ));
-        });
-
-        data.dataset[4].forEach(dr => {
-            dsQuestionnaireAnswerSet.push(new schema.QuestionnaireAnswerSet(
-                dr.ID,
-                dr.empQuestionnaireQuestionID,
-                dr.no,
-                {
-                    th: dr.titleNameTH,
-                    en: dr.titleNameEN
-                },
-                JSON.parse(dr.inputType),
-                dr.actionDate
-            ));
-        });
-
-        data.dataset[5].forEach(dr => {
-            dsQuestionnaireAnswer.push(new schema.QuestionnaireAnswer(
-                dr.ID,
-                dr.empQuestionnaireAnswerSetID,
-                dr.no,
-                dr.choiceOrder,
-                {
-                    th: dr.nameTH,
-                    en: dr.nameEN
-                },
-                {
-                    th: dr.descriptionTH,
-                    en: dr.descriptionEN
-                },
-                JSON.parse(dr.inputType),
-                JSON.parse(dr.specify),
-                JSON.parse(dr.sectionOnOff),
-                dr.actionDate
-            ));
-        });
-    }
-
-    ds.push(new schema.QuestionnaireDoneAndSet(
-        dsQuestionnaireDone,
-        dsQuestionnaireSet,
-        dsQuestionnaireSection,
-        dsQuestionnaireQuestion,
-        dsQuestionnaireAnswerSet,
-        dsQuestionnaireAnswer
-    ));
-
-    data.dataset = ds;
-    conn.close();
-
-    return data;
 }
 
 module.exports = {
     Schema: Schema,
-    getList: getList,
-    get: get
+    QuestionnaireDoneAndSet: QuestionnaireDoneAndSet,
+    QuestionnaireDone: QuestionnaireDone
 };

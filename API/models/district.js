@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๒/๑๑/๒๕๖๔>
-Modify date : <๐๒/๑๑/๒๕๖๔>
+Modify date : <๒๑/๑๒/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -30,19 +30,20 @@ class Schema {
     }    
 }
 
-async function getList() {
+async function doGetList() {
     let db = new util.DB();
     let conn;
     let connRequest;
     
     try {
-        conn = await db.getConnectRequest(process.env.DB_DATABASE_INFINITY);
+        conn = await db.doGetConnectRequest(process.env.DB_DATABASE_INFINITY);
         connRequest = conn.request();
         connRequest.input('sortOrderBy', sql.VarChar, 'Full Name ( TH )');
     }
-    catch { }
+    catch {    
+    }
     
-    let data = await db.executeStoredProcedure(connRequest, 'sp_plcGetListDistrict');
+    let data = await db.doExecuteStoredProcedure(connRequest, 'sp_plcGetListDistrict');
     let ds = [];
     
     if (data.dataset.length > 0) {
@@ -79,5 +80,5 @@ async function getList() {
 
 module.exports = {
     Schema: Schema,
-    getList: getList
+    doGetList: doGetList
 };

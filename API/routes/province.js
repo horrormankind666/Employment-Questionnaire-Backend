@@ -16,9 +16,9 @@ const model = require('../models/province')
 const router = express.Router();
 
 router.get('/GetList', (request, response, next) => {
-    model.getList()
+    model.doGetList()
         .then((result) => {
-            response.json(util.getAPIMessage(response.statusCode, result.dataset, result.message));
+            response.json(util.doGetAPIMessage(response.statusCode, result.dataset, result.message));
         });
 });
 

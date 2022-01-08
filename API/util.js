@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๒๗/๑๐/๒๕๖๔>
+Modify date : <๒๑/๑๒/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -14,7 +14,11 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const sql = require('mssql');
 
-function getAPIMessage(statusCode, data, message) {
+function doGetAPIMessage(
+    statusCode,
+    data,
+    message
+) {
     return {
         statusCode: statusCode,
         data: data,
@@ -22,7 +26,7 @@ function getAPIMessage(statusCode, data, message) {
     };
 }
 
-function parseCUID(str) {
+function doParseCUID(str) {
     try {
         let strDecode = atob(str);
         let strDecodeSplit = strDecode.split('.');
@@ -70,7 +74,7 @@ class DB {
         }
     };
 
-    async getConnectRequest(database) {
+    async doGetConnectRequest(database) {
         try {
             let conn = null;
 
@@ -86,7 +90,10 @@ class DB {
         }
     }
 
-    async executeStoredProcedure(connRequest, spName) {
+    async doExecuteStoredProcedure(
+        connRequest,
+        spName
+    ) {
         try {
             let ds = await connRequest.execute(spName);
 
@@ -107,7 +114,7 @@ class DB {
 
 class Authorization {
     ADFS = {
-        parseToken(str) {
+        doParseToken(str) {
             try {
                 let strDecode = atob(str);
                 let strDecodeSplit = strDecode.split('.');
@@ -119,9 +126,9 @@ class Authorization {
             }
             catch {
                 return null;
-             }
+            }
         },
-        getInfo(request) {
+        doGetInfo(request) {
             let authorization = request.headers.authorization;
             let statusCode = 200;
             let isAuthenticated = false;
@@ -132,8 +139,8 @@ class Authorization {
                 if (authorization.startsWith("Bearer ")) {
                     try {
                         let bearerToken = authorization.substring("Bearer ".length).trim();
-                        let bearerTokenInfo = this.parseToken(bearerToken);
-                        let CUIDInfo = parseCUID(bearerTokenInfo.CUID);
+                        let bearerTokenInfo = this.doParseToken(bearerToken);
+                        let CUIDInfo = doParseCUID(bearerTokenInfo.CUID);
                         let PPID = (CUIDInfo !== null ? CUIDInfo[0] : null);
                         let publickey = fs.readFileSync(__dirname + '/public.key');
 
@@ -142,8 +149,6 @@ class Authorization {
                         if (PPID !== null && payload !== null && PPID === payload.ppid) {
                             statusCode = 200;
                             isAuthenticated = true;
-                            payload.perPersonID = '';
-                            payload.studentCode = '';
                             message = 'OK';
                         }
                         else {
@@ -185,8 +190,8 @@ class Authorization {
 }
 
 module.exports = {
-    getAPIMessage: getAPIMessage,
-    parseCUID: parseCUID,
+    doGetAPIMessage: doGetAPIMessage,
+    doParseCUID: doParseCUID,
     DB: DB,
     Authorization: Authorization
 };

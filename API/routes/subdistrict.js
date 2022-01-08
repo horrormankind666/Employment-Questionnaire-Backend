@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๒/๑๑/๒๕๖๔>
-Modify date : <๐๒/๑๑/๒๕๖๔>
+Modify date : <๒๑/๑๒/๒๕๖๔>
 Description : <>
 =============================================
 */
@@ -16,9 +16,9 @@ const model = require('../models/subdistrict')
 const router = express.Router();
 
 router.get('/GetList', (request, response, next) => {
-    model.getList()
+    model.doGetList()
         .then((result) => {
-            response.json(util.getAPIMessage(response.statusCode, result.dataset, result.message));
+            response.json(util.doGetAPIMessage(response.statusCode, result.dataset, result.message));
         });
 });
 
