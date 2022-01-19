@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๐๘/๐๑/๒๕๖๕>
+Modify date : <๑๒/๐๑/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -53,7 +53,8 @@ class Schema {
             empQuestionnaireAnswer,
             submitStatus,
             cancelStatus,
-            actionDate
+            actionDate,
+            doneDate
         ) {
             this.ID = ID,
             this.empQuestionnaireSetID = empQuestionnaireSetID,
@@ -61,7 +62,8 @@ class Schema {
             this.empQuestionnaireAnswer = empQuestionnaireAnswer,
             this.submitStatus = submitStatus,
             this.cancelStatus = cancelStatus,
-            this.actionDate = actionDate
+            this.actionDate = actionDate,
+            this.doneDate = doneDate
         }
     }
 
@@ -181,17 +183,17 @@ class Schema {
         constructor(
             done,
             set,
-            section,
-            question,
-            answerSet,
-            answer
+            sections,
+            questions,
+            answersets,
+            answers
         ) {
             this.done = done,
             this.set = set,
-            this.section = section,
-            this.question = question,
-            this.answerSet = answerSet,
-            this.answer = answer
+            this.sections = sections,
+            this.questions = questions,
+            this.answersets = answersets,
+            this.answers = answers
         }
     }
 }
@@ -270,17 +272,17 @@ class QuestionnaireDoneAndSet {
 
         let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
         let ds = [];
-        let dsQuestionnaireDone = null;
-        let dsQuestionnaireSet = null;
-        let dsQuestionnaireSection = [];
-        let dsQuestionnaireQuestion = [];
-        let dsQuestionnaireAnswerSet = [];
-        let dsQuestionnaireAnswer = [];
+        let qtndone = null;
+        let qtnset = null;
+        let qtnsections = [];
+        let qtnquestions = [];
+        let qtnanswersets = [];
+        let qtnanswers = [];
         let schema = new Schema();
 
         if (data.dataset.length > 0) {
             data.dataset[0].forEach(dr => {
-                dsQuestionnaireDone = new schema.QuestionnaireDone(
+                qtndone = new schema.QuestionnaireDone(
                     dr.ID,
                     dr.empQuestionnaireSetID,
                     {
@@ -352,15 +354,16 @@ class QuestionnaireDoneAndSet {
                         race2Letter: dr.race2Letter,
                         race3Letter: dr.race3Letter
                     },
-                    dr.empQuestionnaireAnswer,
+                    JSON.parse(dr.empQuestionnaireAnswer),
                     dr.submitStatus,
                     dr.cancelStatus,
-                    dr.actionDate
+                    dr.actionDate,
+                    dr.doneDate
                 );
             });
             
             data.dataset[1].forEach(dr => {
-                dsQuestionnaireSet = new schema.QuestionnaireSet(
+                qtnset = new schema.QuestionnaireSet(
                     dr.ID,
                     dr.year,
                     {
@@ -386,7 +389,7 @@ class QuestionnaireDoneAndSet {
             });
 
             data.dataset[2].forEach(dr => {
-                dsQuestionnaireSection.push(new schema.QuestionnaireSection(
+                qtnsections.push(new schema.QuestionnaireSection(
                     dr.ID,
                     dr.empQuestionnaireSetID,
                     dr.no,
@@ -404,7 +407,7 @@ class QuestionnaireDoneAndSet {
             });
 
             data.dataset[3].forEach(dr => {
-                dsQuestionnaireQuestion.push(new schema.QuestionnaireQuestion(
+                qtnquestions.push(new schema.QuestionnaireQuestion(
                     dr.ID,
                     dr.empQuestionnaireSectionID,
                     dr.no,
@@ -422,7 +425,7 @@ class QuestionnaireDoneAndSet {
             });
 
             data.dataset[4].forEach(dr => {
-                dsQuestionnaireAnswerSet.push(new schema.QuestionnaireAnswerSet(
+                qtnanswersets.push(new schema.QuestionnaireAnswerSet(
                     dr.ID,
                     dr.empQuestionnaireQuestionID,
                     dr.no,
@@ -436,7 +439,7 @@ class QuestionnaireDoneAndSet {
             });
 
             data.dataset[5].forEach(dr => {
-                dsQuestionnaireAnswer.push(new schema.QuestionnaireAnswer(
+                qtnanswers.push(new schema.QuestionnaireAnswer(
                     dr.ID,
                     dr.empQuestionnaireAnswerSetID,
                     dr.no,
@@ -458,12 +461,12 @@ class QuestionnaireDoneAndSet {
         }
 
         ds.push(new schema.QuestionnaireDoneAndSet(
-            dsQuestionnaireDone,
-            dsQuestionnaireSet,
-            dsQuestionnaireSection,
-            dsQuestionnaireQuestion,
-            dsQuestionnaireAnswerSet,
-            dsQuestionnaireAnswer
+            qtndone,
+            qtnset,
+            qtnsections,
+            qtnquestions,
+            qtnanswersets,
+            qtnanswers
         ));
 
         data.dataset = ds;

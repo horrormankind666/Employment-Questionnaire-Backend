@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๒๑/๑๒/๒๕๖๔>
+Modify date : <๑๐/๐๑/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -29,13 +29,13 @@ function doGetAPIMessage(
 function doParseCUID(str) {
     try {
         let strDecode = atob(str);
-        let strDecodeSplit = strDecode.split('.');
-        let data = strDecodeSplit[2];
+        let strDecodes = strDecode.split('.');
+        let data = strDecodes[2];
         let dataReverse = data.split('').reverse().join('');
         let dataReverseDecode = atob(dataReverse);
-        let dataReverseDecodeSplit = dataReverseDecode.split('.');
+        let dataReverseDecodes = dataReverseDecode.split('.');
 
-        return dataReverseDecodeSplit;
+        return dataReverseDecodes;
     }
     catch {
         return null;
@@ -117,11 +117,11 @@ class Authorization {
         doParseToken(str) {
             try {
                 let strDecode = atob(str);
-                let strDecodeSplit = strDecode.split('.');
+                let strDecodes = strDecode.split('.');
     
                 return ({
-                    CUID: atob(strDecodeSplit[0]).split('').reverse().join(''),
-                    token: atob(strDecodeSplit[1]).split('').reverse().join('')
+                    CUID: atob(strDecodes[0]).split('').reverse().join(''),
+                    token: atob(strDecodes[1]).split('').reverse().join('')
                 });
             }
             catch {
@@ -140,8 +140,8 @@ class Authorization {
                     try {
                         let bearerToken = authorization.substring("Bearer ".length).trim();
                         let bearerTokenInfo = this.doParseToken(bearerToken);
-                        let CUIDInfo = doParseCUID(bearerTokenInfo.CUID);
-                        let PPID = (CUIDInfo !== null ? CUIDInfo[0] : null);
+                        let CUIDInfos = doParseCUID(bearerTokenInfo.CUID);
+                        let PPID = (CUIDInfos !== null ? CUIDInfos[0] : null);
                         let publickey = fs.readFileSync(__dirname + '/public.key');
 
                         payload = jwt.verify(bearerTokenInfo.token, publickey, { algorithms: ['RS256'] });
