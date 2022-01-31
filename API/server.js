@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๐๘/๐๑/๒๕๖๕>
+Modify date : <๒๘/๐๑/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -14,6 +14,9 @@ const dotenv = require("dotenv");
 const express = require('express');
 const bodyParser = require('body-parser');
 const util = require('./util');
+const student = require('./models/student');
+const tokenRoute = require('./routes/token');
+const studentRoute = require('./routes/student');
 const countryRoute = require('./routes/country');
 const provinceRoute = require('./routes/province');
 const districtRoute = require('./routes/district');
@@ -32,27 +35,48 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.use((request, response, next) => {
-    let authorization = new util.Authorization();
-    let authen = authorization.ADFS.doGetInfo(request);
+app.use((req, res, next) => {
+    let urls = (req.url.split('/'));
+    let url = (urls.length > 2 ? urls[2] : '');
 
-    if (authen.isAuthenticated) {
-        request.payload = authen.payload;
+    if (url === 'Token')
         next();
+    else {
+        let authorization = new util.Authorization();
+        let authen = authorization.ADFS.doGetInfo(req);
+
+        if (authen.isAuthenticated) {
+            student.doGet(authen.payload.ppid)
+                .then((result) => {
+                    if (result.dataset.length > 0) {
+                        req.payload = authen.payload;
+                        next();
+                    }
+                    else {
+                        authen.statusCode = 404;
+                        authen.isAuthenticated = false;
+                        authen.message = 'User Not Found';
+
+                        res.send(util.doGetAPIMessage(authen.statusCode, [], authen.message));
+                    }
+                });
+        }
+        else
+            res.send(util.doGetAPIMessage(authen.statusCode, [], authen.message));
     }
-    else
-        response.send(util.doGetAPIMessage(authen.statusCode, [], authen.message));
 });
 app.use('/API', router);
 
-app.get('/', (request, response) => {
-    response.status(400).json(util.doGetAPIMessage(response.statusCode, [], 'Bad Request'));
+app.get('/', (req, res) => {
+    res.status(400).json(util.doGetAPIMessage(res.statusCode, [], 'Bad Request'));
 });
 
-app.post('/', (request, response) => {
-    response.status(400).json(util.doGetAPIMessage(response.statusCode, [], 'Bad Request'));
+app.post('/', (req, res) => {
+    res.status(400).json(util.doGetAPIMessage(res.statusCode, [], 'Bad Request'));
 });
 
+router.use('/Token', tokenRoute);
+router.use('/Student', studentRoute);
 router.use('/Country', countryRoute);
 router.use('/Province', provinceRoute);
 router.use('/District', districtRoute);

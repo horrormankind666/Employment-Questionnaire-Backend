@@ -15,10 +15,10 @@ const model = require('../models/country')
 
 const router = express.Router();
 
-router.get('/GetList', (request, response, next) => {
+router.get('/GetList', (req, res, next) => {
     model.doGetList()
         .then((result) => {
-            response.json(util.doGetAPIMessage(response.statusCode, result.dataset, result.message));
+            res.json(util.doGetAPIMessage(res.statusCode, result.dataset, result.message));
         });
 });
 

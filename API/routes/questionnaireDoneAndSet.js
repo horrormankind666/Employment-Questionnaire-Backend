@@ -16,24 +16,24 @@ const model = require('../models/questionnaire');
 const router = express.Router();
 const questionnaireDoneAndSet = new model.QuestionnaireDoneAndSet();
 
-router.get('/GetList', (request, response, next) => {
-    let PPID = request.payload.ppid;
+router.get('/GetList', (req, res, next) => {
+    let PPID = req.payload.ppid;
 
     questionnaireDoneAndSet.doGetList(PPID)
         .then((result) => {
-            response.json(util.doGetAPIMessage(response.statusCode, result.dataset, result.message));
+            res.json(util.doGetAPIMessage(res.statusCode, result.dataset, result.message));
         });
 });
 
-router.get('/Get/(:CUID)', (request, response, next) => {
-    let CUIDInfos = util.doParseCUID(request.params.CUID);
+router.get('/Get/(:CUID)', (req, res, next) => {
+    let CUIDInfos = util.doParseCUID(req.params.CUID);
     let questionnaireDoneID = (CUIDInfos !== null ? (CUIDInfos[0].length > 0 ? CUIDInfos[0] : null) : null);
     let questionnaireSetID = (CUIDInfos !== null ? (CUIDInfos[1].length > 0 ? CUIDInfos[1] : null) : null);
-    let PPID = request.payload.ppid;
+    let PPID = req.payload.ppid;
 
     questionnaireDoneAndSet.doGet(questionnaireDoneID, questionnaireSetID, PPID)
         .then((result) => {
-            response.json(util.doGetAPIMessage(response.statusCode, result.dataset, result.message));
+            res.json(util.doGetAPIMessage(res.statusCode, result.dataset, result.message));
         });
 });
 

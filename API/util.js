@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๐/๐๑/๒๕๖๕>
+Modify date : <๓๐/๐๑/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -128,13 +128,13 @@ class Authorization {
                 return null;
             }
         },
-        doGetInfo(request) {
-            let authorization = request.headers.authorization;
+        doGetInfo(req) {
+            let authorization = req.headers.authorization;
             let statusCode = 200;
             let isAuthenticated = false;
             let payload = {};
             let message = '';
-            
+        
             if (authorization) {
                 if (authorization.startsWith("Bearer ")) {
                     try {
@@ -143,7 +143,7 @@ class Authorization {
                         let CUIDInfos = doParseCUID(bearerTokenInfo.CUID);
                         let PPID = (CUIDInfos !== null ? CUIDInfos[0] : null);
                         let publickey = fs.readFileSync(__dirname + '/public.key');
-
+                        
                         payload = jwt.verify(bearerTokenInfo.token, publickey, { algorithms: ['RS256'] });
 
                         if (PPID !== null && payload !== null && PPID === payload.ppid) {
@@ -154,7 +154,7 @@ class Authorization {
                         else {
                             statusCode = 404;
                             isAuthenticated = false;
-                            message = 'Not Found';
+                            message = 'User Not Found';
                         }
                     }
                     catch(error) {
