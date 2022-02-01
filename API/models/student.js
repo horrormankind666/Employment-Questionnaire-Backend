@@ -86,7 +86,7 @@ async function doGet(studentCode) {
     let connRequest;
     
     try {
-        conn = await db.doGetConnectRequest(process.env.DB_DATABASE_INFINITY);
+        conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
         connRequest = conn.request();
         connRequest.input('studentCode', sql.VarChar, studentCode);
     }

@@ -49,8 +49,12 @@ app.use((req, res, next) => {
             student.doGet(authen.payload.ppid)
                 .then((result) => {
                     if (result.dataset.length > 0) {
-                        req.payload = authen.payload;
-                        next();
+                        if (url === 'Student') 
+                            res.send(util.doGetAPIMessage(authen.statusCode, result.dataset, authen.message));
+                        else {
+                            req.payload = authen.payload;
+                            next();
+                        }
                     }
                     else {
                         authen.statusCode = 404;
