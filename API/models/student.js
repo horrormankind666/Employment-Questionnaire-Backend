@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๘/๐๑/๒๕๖๕>
-Modify date : <๒๘/๐๑/๒๕๖๕>
+Modify date : <๐๒/๐๒/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -37,6 +37,7 @@ class Schema {
 			branchName,
 			classYear,
 			yearEntry,
+            graduateYear,
 			gender,
 			birthDate,
 			nationalityName,
@@ -68,6 +69,7 @@ class Schema {
 			this.branchName = branchName,
 			this.classYear = classYear,
 			this.yearEntry = yearEntry,
+            this.graduateYear = graduateYear,
 			this.gender = gender,
 			this.birthDate = birthDate,
 			this.nationalityName = nationalityName,
@@ -153,6 +155,7 @@ async function doGet(studentCode) {
                 },
                 dr.classYear,
                 dr.yearEntry,
+                dr.graduateYear,
                 dr.gender,
                 dr.birthDate,
                 {
