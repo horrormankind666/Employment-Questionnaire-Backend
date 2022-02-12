@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๓๐/๐๑/๒๕๖๕>
+Modify date : <๐๓/๐๒/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -110,6 +110,27 @@ class DB {
             };
         }
     }
+
+    async doExecuteQuery(
+        connRequest,
+        query
+    ) {
+        try {
+            let ds = await connRequest.query(query);
+
+            return {
+                dataset: ds.recordsets,
+                message: 'OK'
+            };
+        } catch (error) {
+            console.log(error);
+
+            return {
+                dataset: [],
+                message: 'Database Connection Fail'
+            };
+        }
+    }    
 }
 
 class Authorization {

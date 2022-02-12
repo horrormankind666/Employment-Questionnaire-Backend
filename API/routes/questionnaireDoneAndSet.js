@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๑๐/๐๑/๒๕๖๕>
+Modify date : <๑๑/๐๒/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -25,7 +25,7 @@ router.get('/GetList', (req, res, next) => {
         });
 });
 
-router.get('/Get/(:CUID)', (req, res, next) => {
+router.get('/Get/(:CUID)?', (req, res, next) => {
     let CUIDInfos = util.doParseCUID(req.params.CUID);
     let questionnaireDoneID = (CUIDInfos !== null ? (CUIDInfos[0].length > 0 ? CUIDInfos[0] : null) : null);
     let questionnaireSetID = (CUIDInfos !== null ? (CUIDInfos[1].length > 0 ? CUIDInfos[1] : null) : null);

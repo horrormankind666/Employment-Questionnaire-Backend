@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๒๘/๐๑/๒๕๖๕>
+Modify date : <๑๑/๐๒/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -17,6 +17,8 @@ const util = require('./util');
 const student = require('./models/student');
 const tokenRoute = require('./routes/token');
 const studentRoute = require('./routes/student');
+const careerRoute = require('./routes/career');
+const programRoute = require('./routes/program');
 const countryRoute = require('./routes/country');
 const provinceRoute = require('./routes/province');
 const districtRoute = require('./routes/district');
@@ -81,6 +83,8 @@ app.post('/', (req, res) => {
 
 router.use('/Token', tokenRoute);
 router.use('/Student', studentRoute);
+router.use('/Career', careerRoute);
+router.use('/Program', programRoute);
 router.use('/Country', countryRoute);
 router.use('/Province', provinceRoute);
 router.use('/District', districtRoute);
