@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๑๒/๐๑/๒๕๖๕>
+Modify date : <๐๓/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -11,213 +11,25 @@ Description : <>
 
 const sql = require('mssql');
 const util = require('../util');
-
-class Schema {
-    QuestionnaireDone = class {
-        constructor(
-            ID,
-            empQuestionnaireSetID,
-            userInfo = {
-                PPID,
-                perPersonID,
-                studentCode,
-                IDCard,
-                titlePrefix,
-                firstName,
-                middleName,
-                lastName,
-                instituteName,
-                facultyID,
-                facultyCode,
-                facultyName,
-                programID,
-                programCode,
-                majorCode,
-                groupNum,
-                degreeLevelName,
-                programName,
-                degreeName,
-                branchID,
-                branchName,
-                classYear,
-                yearEntry,
-                gender,
-                birthDate,
-                nationalityName,
-                nationality2Letter,
-                nationality3Letter,
-                raceName,
-                race2Letter,
-                race3Letter
-            },
-            empQuestionnaireAnswer,
-            submitStatus,
-            cancelStatus,
-            actionDate,
-            doneDate
-        ) {
-            this.ID = ID,
-            this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.userInfo = userInfo,            
-            this.empQuestionnaireAnswer = empQuestionnaireAnswer,
-            this.submitStatus = submitStatus,
-            this.cancelStatus = cancelStatus,
-            this.actionDate = actionDate,
-            this.doneDate = doneDate
-        }
-    }
-
-    QuestionnaireSet = class { 
-        constructor(
-            ID,
-            year,
-            name,
-            description,
-            notice,
-            showStatus,
-            cancelStatus,
-            empQuestionnaireDoneID,
-            submitStatus,
-            doneDate,
-            actionDate
-        ) {
-            this.ID = ID,
-            this.year = year,
-            this.name = name,
-            this.description = description,
-            this.notice = notice,
-            this.showStatus = showStatus,
-            this.cancelStatus = cancelStatus,
-            this.empQuestionnaireDoneID = empQuestionnaireDoneID,
-            this.submitStatus = submitStatus,
-            this.doneDate= doneDate,
-            this.actionDate = actionDate
-        }
-    }
-
-    QuestionnaireSection = class {
-        constructor(
-            ID,
-            empQuestionnaireSetID,
-            no,
-            titleName,
-            name,
-            disableStatus,
-            actionDate
-        ) {
-            this.ID = ID,
-            this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.no = no,
-            this.titleName = titleName,
-            this.name = name,
-            this.disableStatus = disableStatus,
-            this.actionDate = actionDate
-        }
-    }
-
-    QuestionnaireQuestion = class {
-        constructor(
-            ID,
-            empQuestionnaireSectionID,
-            no,
-            name,
-            description,
-            condition,
-            actionDate
-        ) {
-            this.ID = ID,
-            this.empQuestionnaireSectionID = empQuestionnaireSectionID,
-            this.no = no,
-            this.name = name,
-            this.description = description,
-            this.condition = condition,
-            this.actionDate = actionDate
-        }
-    }
-
-    QuestionnaireAnswerSet = class {
-        constructor(
-            ID,
-            empQuestionnaireQuestionID,
-            no,
-            titleName,
-            inputType,
-            actionDate
-        ) {
-            this.ID = ID,
-            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID,
-            this.no = no,
-            this.titleName = titleName,
-            this.inputType = inputType,
-            this.actionDate = actionDate
-        }
-    }
-
-    QuestionnaireAnswer = class {
-        constructor(
-            ID,
-            empQuestionnaireAnswerSetID,
-            no,
-            choiceOrder,
-            name,
-            description,
-            inputType,
-            specify,
-            eventAction,
-            actionDate
-        ) {
-            this.ID = ID,
-            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
-            this.no = no,
-            this.choiceOrder = choiceOrder,
-            this.name = name,
-            this.description = description,
-            this.inputType = inputType,
-            this.specify = specify,
-            this.eventAction = eventAction,
-            this.actionDate = actionDate
-        }
-    }
-
-    QuestionnaireDoneAndSet = class {
-        constructor(
-            done,
-            set,
-            sections,
-            questions,
-            answersets,
-            answers
-        ) {
-            this.done = done,
-            this.set = set,
-            this.sections = sections,
-            this.questions = questions,
-            this.answersets = answersets,
-            this.answers = answers
-        }
-    }
-}
+const schema = require('./schema');
 
 class QuestionnaireDoneAndSet {
     async doGetList(PPID) {
-        let db = new util.DB();
         let conn;
         let connRequest;
         
         try {
-            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
             connRequest = conn.request();
             connRequest.input('PPID', sql.VarChar, PPID);
         }
         catch {
         }
         
-        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empGetListQuestionnaireDoneAndSet');
+        let data = await util.db.doExecuteStoredProcedure(connRequest, 'sp_empGetListQuestionnaireDoneAndSet');
         let ds = [];
 
         if (data.dataset.length > 0) {
-            let schema = new Schema();
-
             data.dataset[0].forEach(dr => {
                 ds.push(new schema.QuestionnaireSet(
                     dr.ID,
@@ -256,12 +68,11 @@ class QuestionnaireDoneAndSet {
         questionnaireSetID,
         PPID
     ) {
-        let db = new util.DB(); 
         let conn;
         let connRequest;
 
         try {
-            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
             connRequest = conn.request();
             connRequest.input('empQuestionnaireDoneID', sql.VarChar, questionnaireDoneID);
             connRequest.input('empQuestionnaireSetID', sql.VarChar, questionnaireSetID);
@@ -270,7 +81,7 @@ class QuestionnaireDoneAndSet {
         catch {
         }
 
-        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
+        let data = await util.db.doExecuteStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
         let ds = [];
         let qtndone = null;
         let qtnset = null;
@@ -278,7 +89,6 @@ class QuestionnaireDoneAndSet {
         let qtnquestions = [];
         let qtnanswersets = [];
         let qtnanswers = [];
-        let schema = new Schema();
 
         if (data.dataset.length > 0) {
             data.dataset[0].forEach(dr => {
@@ -481,12 +291,11 @@ class QuestionnaireDone {
         method,
         jsonData
     ) {
-        let db = new util.DB();
         let conn;
         let connRequest;
         
         try {
-            conn = await db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
             connRequest = conn.request();
             connRequest.input('method', sql.VarChar, method);
             connRequest.input('jsonData', sql.NVarChar, jsonData);
@@ -494,7 +303,7 @@ class QuestionnaireDone {
         catch {
         }
 
-        let data = await db.doExecuteStoredProcedure(connRequest, 'sp_empSetQuestionnaireDone');
+        let data = await util.db.doExecuteStoredProcedure(connRequest, 'sp_empSetQuestionnaireDone');
         let ds = [];
 
         if (data.dataset.length > 0)
@@ -507,8 +316,11 @@ class QuestionnaireDone {
     }
 }
 
-module.exports = {
-    Schema: Schema,
-    QuestionnaireDoneAndSet: QuestionnaireDoneAndSet,
-    QuestionnaireDone: QuestionnaireDone
-};
+class Questionnaire {
+    constructor() {
+        this.doneandset = new QuestionnaireDoneAndSet(),
+        this.done = new QuestionnaireDone()
+    }
+}
+
+module.exports = new Questionnaire();

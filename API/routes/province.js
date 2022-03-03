@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๗/๑๐/๒๕๖๔>
-Modify date : <๒๗/๑๐/๒๕๖๔>
+Modify date : <๐๓/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -11,12 +11,12 @@ Description : <>
 
 const express = require('express');
 const util = require('../util');
-const model = require('../models/province')
+const provinceModel = require('../models/province')
 
 const router = express.Router();
 
 router.get('/GetList', (req, res, next) => {
-    model.doGetList()
+    provinceModel.doGetList()
         .then((result) => {
             res.json(util.doGetAPIMessage(res.statusCode, result.dataset, result.message));
         });

@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๐๓/๐๒/๒๕๖๕>
+Modify date : <๐๓/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -14,33 +14,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const sql = require('mssql');
 
-function doGetAPIMessage(
-    statusCode,
-    data,
-    message
-) {
-    return {
-        statusCode: statusCode,
-        data: data,
-        message: (message ? message : (statusCode === 200 ? 'OK' : ''))
-    };
-}
-
-function doParseCUID(str) {
-    try {
-        let strDecode = atob(str);
-        let strDecodes = strDecode.split('.');
-        let data = strDecodes[2];
-        let dataReverse = data.split('').reverse().join('');
-        let dataReverseDecode = atob(dataReverse);
-        let dataReverseDecodes = dataReverseDecode.split('.');
-
-        return dataReverseDecodes;
-    }
-    catch {
-        return null;
-    }
-}
+require('dotenv').config();
 
 class DB {
     bermuda = { 
@@ -58,6 +32,7 @@ class DB {
             } 
         }
     };
+
     infinity = {
         config: {
             user: process.env.DB_USER,
@@ -83,7 +58,7 @@ class DB {
             
             if (database === process.env.DB_DATABASE_BERMUDA)
                 conn = await sql.connect(this.bermuda.config);
-                        
+
             return conn;
         }
         catch {
@@ -130,7 +105,7 @@ class DB {
                 message: 'Database Connection Fail'
             };
         }
-    }    
+    }
 }
 
 class Authorization {
@@ -150,21 +125,22 @@ class Authorization {
             }
         },
         doGetInfo(req) {
+            let util = new Util();
             let authorization = req.headers.authorization;
             let statusCode = 200;
             let isAuthenticated = false;
             let payload = {};
             let message = '';
-        
+
             if (authorization) {
                 if (authorization.startsWith("Bearer ")) {
                     try {
                         let bearerToken = authorization.substring("Bearer ".length).trim();
                         let bearerTokenInfo = this.doParseToken(bearerToken);
-                        let CUIDInfos = doParseCUID(bearerTokenInfo.CUID);
+                        let CUIDInfos = util.doParseCUID(bearerTokenInfo.CUID);
                         let PPID = (CUIDInfos !== null ? CUIDInfos[0] : null);
                         let publickey = fs.readFileSync(__dirname + '/public.key');
-                        
+
                         payload = jwt.verify(bearerTokenInfo.token, publickey, { algorithms: ['RS256'] });
 
                         if (PPID !== null && payload !== null && PPID === payload.ppid) {
@@ -207,12 +183,42 @@ class Authorization {
                 message: message
             };
         }
-    };
+    }
 }
 
-module.exports = {
-    doGetAPIMessage: doGetAPIMessage,
-    doParseCUID: doParseCUID,
-    DB: DB,
-    Authorization: Authorization
-};
+class Util {
+    constructor() {
+        this.db = new DB(),
+        this.authorization = new Authorization()
+    }
+
+    doGetAPIMessage(
+        statusCode,
+        data,
+        message
+    ) {
+        return {
+            statusCode: statusCode,
+            data: data,
+            message: (message ? message : (statusCode === 200 ? 'OK' : ''))
+        };
+    }
+
+    doParseCUID(str) {
+        try {
+            let strDecode = atob(str);
+            let strDecodes = strDecode.split('.');
+            let data = strDecodes[2];
+            let dataReverse = data.split('').reverse().join('');
+            let dataReverseDecode = atob(dataReverse);
+            let dataReverseDecodes = dataReverseDecode.split('.');
+
+            return dataReverseDecodes;
+        }
+        catch {
+            return null;
+        }
+    }
+}
+
+module.exports = new Util();

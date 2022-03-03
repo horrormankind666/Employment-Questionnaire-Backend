@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๑/๐๒/๒๕๖๕>
+Modify date : <๐๓/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -10,11 +10,10 @@ Description : <>
 'use strict';
 
 const cors = require('cors');
-const dotenv = require("dotenv");
 const express = require('express');
 const bodyParser = require('body-parser');
 const util = require('./util');
-const student = require('./models/student');
+const studentModel = require('./models/student');
 const tokenRoute = require('./routes/token');
 const studentRoute = require('./routes/student');
 const careerRoute = require('./routes/career');
@@ -26,10 +25,10 @@ const subdistrictRoute = require('./routes/subdistrict');
 const questionnaireDoneAndSetRoute = require('./routes/questionnaireDoneAndSet');
 const questionnaireDoneRoute = require('./routes/questionnaireDone');
 
+require("dotenv").config();
+
 const app = express();
 const router = express.Router();
-
-dotenv.config();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -44,17 +43,17 @@ app.use((req, res, next) => {
     if (url === 'Token')
         next();
     else {
-        let authorization = new util.Authorization();
-        let authen = authorization.ADFS.doGetInfo(req);
+        let authen = util.authorization.ADFS.doGetInfo(req);
 
         if (authen.isAuthenticated) {
-            student.doGet(authen.payload.ppid)
+            studentModel.doGet(authen.payload.ppid)
                 .then((result) => {
                     if (result.dataset.length > 0) {
                         if (url === 'Student') 
                             res.send(util.doGetAPIMessage(authen.statusCode, result.dataset, authen.message));
                         else {
                             req.payload = authen.payload;
+                            
                             next();
                         }
                     }
