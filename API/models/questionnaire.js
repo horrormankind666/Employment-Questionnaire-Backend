@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -58,7 +58,7 @@ class QuestionnaireDoneAndSet {
         }
 
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }
@@ -280,7 +280,7 @@ class QuestionnaireDoneAndSet {
         ));
 
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }
@@ -310,7 +310,7 @@ class QuestionnaireDone {
             ds = data.dataset[0];
 
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }

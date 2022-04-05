@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๗/๑๐/๒๕๖๔>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -47,7 +47,7 @@ class Province {
         }
         
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }

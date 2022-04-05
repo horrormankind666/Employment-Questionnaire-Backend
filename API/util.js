@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -50,9 +50,9 @@ class DB {
     };
 
     async doGetConnectRequest(database) {
-        try {
-            let conn = null;
+        let conn = null;
 
+        try {
             if (database === process.env.DB_DATABASE_INFINITY)
                 conn = await sql.connect(this.infinity.config);
             
@@ -63,6 +63,8 @@ class DB {
         }
         catch {
         }
+
+        return conn;
     }
 
     async doExecuteStoredProcedure(
@@ -106,6 +108,11 @@ class DB {
             };
         }
     }
+
+    doConnClose(conn) {
+        if (conn !== null)
+            conn.close();
+    }
 }
 
 class Authorization {
@@ -117,7 +124,8 @@ class Authorization {
     
                 return ({
                     CUID: atob(strDecodes[0]).split('').reverse().join(''),
-                    token: atob(strDecodes[1]).split('').reverse().join('')
+                    token: atob(strDecodes[1]).split('').reverse().join(''),
+                    tokenExpiration: parseFloat(atob(strDecodes[2]).split('').reverse().join(''))
                 });
             }
             catch {
@@ -134,34 +142,47 @@ class Authorization {
 
             if (authorization) {
                 if (authorization.startsWith("Bearer ")) {
+                    let bearerToken = authorization.substring("Bearer ".length).trim();
+                    let bearerTokenInfo = this.doParseToken(bearerToken);
+                    let CUIDInfos = util.doParseCUID(bearerTokenInfo.CUID);
+                    let PPID = (CUIDInfos !== null ? CUIDInfos[0] : null);
+                    let isValid = true;
+
                     try {
-                        let bearerToken = authorization.substring("Bearer ".length).trim();
-                        let bearerTokenInfo = this.doParseToken(bearerToken);
-                        let CUIDInfos = util.doParseCUID(bearerTokenInfo.CUID);
-                        let PPID = (CUIDInfos !== null ? CUIDInfos[0] : null);
                         let publickey = fs.readFileSync(__dirname + '/public.key');
 
                         payload = jwt.verify(bearerTokenInfo.token, publickey, { algorithms: ['RS256'] });
-
-                        if (PPID !== null && payload !== null && PPID === payload.ppid) {
-                            statusCode = 200;
-                            isAuthenticated = true;
-                            message = 'OK';
-                        }
-                        else {
-                            statusCode = 404;
-                            isAuthenticated = false;
-                            message = 'User Not Found';
-                        }
                     }
                     catch(error) {
+                        if (error.name === 'TokenExpiredError')
+                            payload = jwt.decode(bearerTokenInfo.token);
+                        else
+                            isValid = false;
+                    }
+
+                    if (isValid === true) {
+                        if (this.doIsTokenExpired(bearerTokenInfo.tokenExpiration) === false) {
+                            if (PPID !== null && payload !== null && PPID === payload.ppid) {
+                                statusCode = 200;
+                                isAuthenticated = true;
+                                message = 'OK';
+                            }
+                            else {
+                                statusCode = 404;
+                                isAuthenticated = false;
+                                message = 'User Not Found';
+                            }
+                        }
+                        else {
+                            statusCode = 401;
+                            isAuthenticated = false;
+                            message = 'Token Expired';
+                        }
+                    }
+                    else {
                         statusCode = 401;
                         isAuthenticated = false;
-    
-                        if (error.name === 'TokenExpiredError')
-                            message = 'Token Expired';
-                        else
-                            message = 'Token Invalid';
+                        message = 'Token Invalid';
                     }
                 }
                 else {
@@ -182,6 +203,16 @@ class Authorization {
                 payload: payload,
                 message: message
             };
+        },
+        doIsTokenExpired(tokenExpiration) {
+            if (tokenExpiration !== null) {
+                if (tokenExpiration < (Date.now() / 1000))
+                    return true;
+    
+                return false;
+            }
+    
+            return true;
         }
     }
 }

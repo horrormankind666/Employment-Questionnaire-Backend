@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๘/๐๑/๒๕๖๕>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -104,7 +104,7 @@ class Student {
         }
         
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
             
         return data;
     }

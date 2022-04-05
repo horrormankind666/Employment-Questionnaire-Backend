@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๒/๑๑/๒๕๖๔>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -61,7 +61,7 @@ class Subdistrict {
         }
         
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }

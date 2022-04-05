@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๑/๐๒/๒๕๖๕>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๘/๐๓/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -43,7 +43,7 @@ class Career {
         }
         
         data.dataset = ds;
-        conn.close();
+        util.db.doConnClose(conn);
 
         return data;
     }
