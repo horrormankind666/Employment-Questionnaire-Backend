@@ -115,7 +115,7 @@ class Schema {
         ) {
             this.ID = ID,
             this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.userInfo = userInfo,            
+            this.userInfo = userInfo,
             this.empQuestionnaireAnswer = empQuestionnaireAnswer,
             this.submitStatus = submitStatus,
             this.cancelStatus = cancelStatus,

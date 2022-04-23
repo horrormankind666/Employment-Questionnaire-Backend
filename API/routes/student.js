@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.get('/Get', (req, res, next) => {
     let PPID = req.payload.ppid;
-
+    
     studentModel.doGet(PPID)
         .then((result) => {
             res.json(util.doGetAPIMessage(res.statusCode, result.dataset, result.message));

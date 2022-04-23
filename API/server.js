@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๑๒/๐๔/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -15,6 +15,7 @@ const bodyParser = require('body-parser');
 const util = require('./util');
 const studentModel = require('./models/student');
 const tokenRoute = require('./routes/token');
+const msentRoute = require('./routes/m-sent');
 const studentRoute = require('./routes/student');
 const careerRoute = require('./routes/career');
 const programRoute = require('./routes/program');
@@ -24,6 +25,7 @@ const districtRoute = require('./routes/district');
 const subdistrictRoute = require('./routes/subdistrict');
 const questionnaireDoneAndSetRoute = require('./routes/questionnaireDoneAndSet');
 const questionnaireDoneRoute = require('./routes/questionnaireDone');
+const { Router } = require('express');
 
 require("dotenv").config();
 
@@ -40,12 +42,16 @@ app.use((req, res, next) => {
     let urls = (req.url.split('/'));
     let url = (urls.length > 2 ? urls[2] : '');
 
-    if (url === 'Token')
+    if (['Token', 'M-Sent'].filter((route) => route === url).length > 0)
         next();
     else {
         let authen = util.authorization.ADFS.doGetInfo(req);
 
         if (authen.isAuthenticated) {
+            /*
+            authen.payload.ppid = '6011258';
+            authen.payload.ppid = '6218041';
+            */
             studentModel.doGet(authen.payload.ppid)
                 .then((result) => {
                     if (result.dataset.length > 0) {
@@ -81,6 +87,7 @@ app.post('/', (req, res) => {
 });
 
 router.use('/Token', tokenRoute);
+router.use('/M-Sent', msentRoute);
 router.use('/Student', studentRoute);
 router.use('/Career', careerRoute);
 router.use('/Program', programRoute);
