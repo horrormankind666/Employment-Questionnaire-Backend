@@ -154,8 +154,7 @@ class Questionnaire {
                         '                               [PROGRAM_NAME] ' +
                         '                       from	Bermuda..MUA_REF_PROGRAM with(nolock) ' +
                         '                   ) as n on a.FurtherStudyProgram = n.PROGRAM_ID ' +
-                        '           where   (b.studentCode = \'6011258\') and ' +
-                        '                   (b.status in (\'100\', \'101\', \'102\')) and ' +
+                        '           where   (b.status in (\'100\', \'101\', \'102\')) and ' +
                         '                   (g.[group] = \'01\') and ' +
                         '                   (b.graduateYear is not null) and ' +
                         '                   (b.graduateDate is not null) and ' +
