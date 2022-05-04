@@ -50,7 +50,9 @@ app.use((req, res, next) => {
         if (authen.isAuthenticated) {
             /*
             authen.payload.ppid = '6011258';
-            authen.payload.ppid = '6218041';
+            6011258
+            6218041
+            4902045
             */
             studentModel.doGet(authen.payload.ppid)
                 .then((result) => {

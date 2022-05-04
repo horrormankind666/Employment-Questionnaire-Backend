@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๔/๐๓/๒๕๖๕>
-Modify date : <๐๕/๐๔/๒๕๖๕>
+Modify date : <๐๓/๐๕/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -154,7 +154,8 @@ class Questionnaire {
                         '                               [PROGRAM_NAME] ' +
                         '                       from	Bermuda..MUA_REF_PROGRAM with(nolock) ' +
                         '                   ) as n on a.FurtherStudyProgram = n.PROGRAM_ID ' +
-                        '           where   (b.status in (\'100\', \'101\', \'102\')) and ' +
+                        '           where   (b.studentCode = \'6011258\') and ' +
+                        '                   (b.status in (\'100\', \'101\', \'102\')) and ' +
                         '                   (g.[group] = \'01\') and ' +
                         '                   (b.graduateYear is not null) and ' +
                         '                   (b.graduateDate is not null) and ' +
@@ -198,14 +199,6 @@ class Questionnaire {
     formatting = {
         tableName: null,
         data: null,
-        qtnanswered: {
-            qtnquestionID: null,
-            qtnanswersetID: null,
-            qtnanswerID: null,
-            answer: null,
-            answerOther: null,
-            errorStatus: null
-        },
         country: {
             that: this,
             doSet() {
@@ -332,88 +325,108 @@ class Questionnaire {
                 return this.that.formatting.data;
             }
         },
-        questionnaireAnswered: {
+        offeredAnswer: {
             that: this,
+            qtnquestionID: null,
+            errorStatus: null,
+            qtnanswersetID: null,
+            qtnanswerID: null,
+            answer: null,
+            answerOther: null,
             doSet() {
-                let qtnquestionID = this.that.formatting.qtnanswered.qtnquestionID;
-                let qtnanswersetID = this.that.formatting.qtnanswered.qtnanswersetID;
-                let qtnanswerID = this.that.formatting.qtnanswered.qtnanswerID;
-                let answer = this.that.formatting.qtnanswered.answer;
-                let answerOther = this.that.formatting.qtnanswered.answerOther;
-                let errorStatus = this.that.formatting.qtnanswered.errorStatus;
-                let qtnanswered;
-
-                qtnanswered = {
+                let offeredAnswer = {
                     question: {
-                        ID: qtnquestionID,
-                        errorStatus: errorStatus
+                        ID: this.qtnquestionID,
+                        errorStatus: this.errorStatus
+                    },
+                    answerset: {
+                        ID: this.qtnanswersetID
                     },
                     answer: {
-                        ID: (qtnanswersetID !== null ? qtnanswersetID : qtnanswerID),
-                        value: answer
+                        ID: this.qtnanswerID,
+                        value: this.answer
                     }
                 };
 
-                if (answer !== null) {
-                    let qtnanswers = (Array.isArray(answer) === false ? [answer] : answer);
-                    let qtnanswerspecifies = qtnanswers.filter((dr) => (dr.specify !== undefined && dr.specify !== null))
-                    let specifies = [];
+                if (this.qtnanswerID !== null) {
+                    let qtnanswerIDs = (Array.isArray(this.qtnanswerID) === false ? [this.qtnanswerID] : this.qtnanswerID);
                     
-                    if (answerOther !== null && answerOther.length > 0) {
-                        qtnanswerspecifies.forEach((qtnanswer, index) => {
-                            let answerotherObj = answerOther[`${index}`];
+                    if (this.that.formatting.data !== null) {
+                        let qtnanswer = null
+                        let qtnanswerspecifies = [];
+                        let qtnanswerspecifyitemspecifies = [];
+                        let offeredanswerspecify = []
+                        let datasource = Object.assign([], this.that.formatting.data);
 
-                            if (answerotherObj !== null && answerotherObj.value !== null) {
-                                specifies.push({
-                                    ID: qtnanswer.ID,
-                                    value: answerotherObj.value
-                                });
-                                
-                                let answerothervalues = (Array.isArray(answerotherObj.value) === false ? [answerotherObj.value] : answerotherObj.value);
-                                let answerothervaluespecifies = answerothervalues.filter((dr) => (dr.specify !== undefined && dr.specify !== null))
+                        qtnanswerIDs.forEach((qtnanswerID) => {
+                            qtnanswer = this.that.doFilter('questionnaireAnswer', datasource, 'ID', qtnanswerID);
 
-                                answerothervaluespecifies.forEach((answerothervalue) => {
-                                    if (answerotherObj.specify !== undefined && answerotherObj.specify !== null)
-                                        specifies[specifies.length - 1].specify = {
-                                            ID: answerothervalue.ID,
-                                            value: answerotherObj.specify
-                                        };
-                                });
-                            }
+                            if (qtnanswer.specify !== undefined && qtnanswer.specify !== null)
+                                qtnanswerspecifies.push(qtnanswer.specify);
                         });
-                    }
 
-                    if (qtnanswerspecifies.length === specifies.length) {
-                        errorStatus = 'N';
+                        if (qtnanswerspecifies[0] !== undefined)
+                            qtnanswerspecifies = Object.assign([], qtnanswerspecifies[0]);
 
-                        if (specifies.length > 0) {
-                            let qtnanswerspecifyitems = [];
-
-                            specifies.forEach((specify) => {
-                                let specifyitems = (Array.isArray(specify.value) === false ? [specify.value] : specify.value);
+                        let specifies = [];
+                        
+                        if (this.answerOther !== null && this.answerOther.length > 0) {
+                            qtnanswerspecifies.forEach((qtnanswerspecify, index) => {
+                                let answerotherObj = this.answerOther[`${index}`];
                                 
-                                specifyitems.filter((dr) => (dr.specify !== undefined && dr.specify !== null)).forEach((specifyitem) => {
-                                    qtnanswerspecifyitems.push(specifyitem);
-                                });
+                                if (answerotherObj !== null && answerotherObj.value !== null)
+                                    specifies.push({
+                                        ID: qtnanswer.ID,
+                                        value: answerotherObj.value
+                                    });
+
+
+                                if (qtnanswerspecify.items !== undefined) {
+                                    let qtnanswerspecifyitems = Object.assign([], qtnanswerspecify.items);
+                                    let answerothervalues = (Array.isArray(answerotherObj.value) === false ? [answerotherObj.value] : answerotherObj.value);
+                                    
+                                    answerothervalues.forEach((answerothervalue) => {
+                                        qtnanswerspecifyitems.filter((dr) => dr.ID === answerothervalue).forEach((qtnanswerspecifyitem) => {
+                                            if (qtnanswerspecifyitem.specify !== undefined && qtnanswerspecifyitem.specify !== null) {
+                                                qtnanswerspecifyitemspecifies.push(qtnanswerspecifyitem);
+
+                                                if (answerotherObj.specify !== undefined && answerotherObj.specify !== null) {
+                                                    specifies[specifies.length - 1].specify = {
+                                                        ID: answerothervalue,
+                                                        value: answerotherObj.specify
+                                                    };
+                                                    offeredanswerspecify.push(specifies[specifies.length - 1]);
+                                                }
+                                            }
+                                        });
+                                    });
+                                }
+
                             });
-
-                            let qtnanswerspecifyspecifies = specifies.filter((dr) => (dr.specify !== undefined && dr.specify !== null));
-                            
-                            errorStatus = (qtnanswerspecifyitems.length === qtnanswerspecifyspecifies.length ? 'N' : 'Y');
                         }
+
+                        
+                        let errorStatus = this.errorStatus;
+
+                        if (qtnanswerspecifies.length === specifies.length) {
+                            errorStatus = 'N';
+
+                            if (specifies.length > 0)
+                                errorStatus = (qtnanswerspecifyitemspecifies.length === offeredanswerspecify.length ? 'N' : 'Y');
+                        }
+                        else
+                            errorStatus = 'Y';
+                        
+                        offeredAnswer.question.errorStatus = errorStatus;
+                        
+                        if (specifies.length > 0)
+                            offeredAnswer.answer.specify = {
+                                values: specifies
+                            };
                     }
-                    else
-                        errorStatus = 'Y';
-                    
-                    qtnanswered.question.errorStatus = errorStatus;
-
-                    if (specifies.length > 0)
-                        qtnanswered.answer.specify = {
-                            values: specifies
-                        };
                 }
-
-                return qtnanswered;
+                
+                return offeredAnswer;
             }
         },
         doSet() {
@@ -448,49 +461,45 @@ class Questionnaire {
         let datasource = await this.datasource.doGetList();
                 
         console.log('There are ' + datasource.old.dones.length + ' records of data.');
-
+        
         if (datasource.old.dones.length > 0) {
             console.log('\nGet Questionnaire ( new ) From Bermuda..empQuestionnaireAnswer');
 
             if (datasource.new.qtnanswers.length > 0) {
                 let qtndone;
-                let qtnanswered;
                 let qtnanswer;
                 let qtnanswerspecifyitem;
                 let qtnanswerID;
                 let address;
                 let answer;
                 let answerOther;
+                let offeredAnswer;
 
                 console.log('Start Export Data From Infinity..surQuestionaire to Bermuda..empQuestionnairDone')
-
+                
                 datasource.old.dones.forEach((dr, index) => {
                     qtndone = null;
-                    qtnanswered = [];
+                    offeredAnswer = [];
 
                     //1. สถาบันการศึกษา
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '8EB152F0-705F-4639-9C52-9384BA62A0B5',
-                        qtnanswersetID: null,
-                        qtnanswerID: '1A3D05F1-605A-4692-BB2E-592BEA2577B3',
-                        answer: 'institute',
-                        answerOther: null,
-                        errorStatus: 'N'
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '8EB152F0-705F-4639-9C52-9384BA62A0B5';
+                    this.formatting.offeredAnswer.errorStatus = 'N';
+                    this.formatting.offeredAnswer.qtnanswersetID = 'B01FB652-E3E2-4648-A20A-53F5F3C09DE9';
+                    this.formatting.offeredAnswer.qtnanswerID = '1A3D05F1-605A-4692-BB2E-592BEA2577B3';
+                    this.formatting.offeredAnswer.answer = 'institute';
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //2. ข้อมูลส่วนตัว
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'E25C8EF2-EB06-4D4D-B892-44F29ACFB5E7',
-                        qtnanswersetID: null,
-                        qtnanswerID: 'B862314D-0239-4AFD-B32B-2A162EA15E62',
-                        answer: 'personal detail',
-                        answerOther: null,
-                        errorStatus: 'N'
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = 'E25C8EF2-EB06-4D4D-B892-44F29ACFB5E7';
+                    this.formatting.offeredAnswer.errorStatus = 'N';
+                    this.formatting.offeredAnswer.qtnanswersetID = '996720F2-E091-4884-ACE8-70F0576E9A96';
+                    this.formatting.offeredAnswer.qtnanswerID = 'B862314D-0239-4AFD-B32B-2A162EA15E62';
+                    this.formatting.offeredAnswer.answer = 'personal detail';
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //3. ที่อยู่ปัจจุบัน
                     address = {};
@@ -513,27 +522,35 @@ class Questionnaire {
                     answer = this.doFilter('country', datasource.new.countries, 'id', '217');
 
                     if (answer !== null)
-                        address['country'] = answer;
+                        address['country'] = {
+                            ID: answer.ID
+                        };
                     
                     if (dr.AddrProvince !== null && dr.AddrProvince.length > 0) {
                         answer = this.doFilter('province', datasource.new.provinces, 'id', dr.AddrProvince);
 
                         if (answer !== null)
-                            address['province'] = answer;
+                            address['province'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.AddrDistrict !== null && dr.AddrDistrict.length > 0) {
                         answer = this.doFilter('district', datasource.new.districts, 'id', dr.AddrDistrict);
 
                         if (answer !== null)
-                            address['district'] = answer;
+                            address['district'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.AddrSubDistrict !== null && dr.AddrSubDistrict.length > 0) {
                         answer = this.doFilter('subdistrict', datasource.new.subdistricts, 'id', dr.AddrSubDistrict);
 
                         if (answer !== null) 
-                            address['subdistrict'] = answer;
+                            address['subdistrict'] = {
+                                ID: answer.ID
+                            };
                     } 
 
                     if (dr.AddrZip !== null && dr.AddrZip.length > 0)
@@ -550,33 +567,34 @@ class Questionnaire {
 
                     if (dr.EMail !== null && dr.EMail.length > 0)
                         address['email'] = dr.EMail;
-
+                    
                     answer = (Object.keys(address).length > 0 ? address : null);
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '654D0942-E354-48DB-BEB6-657A303A9BA6',
-                        qtnanswersetID: null,
-                        qtnanswerID: '23B05F55-0C94-40E8-90EA-09A2768B1322',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.offeredAnswer.qtnquestionID = '654D0942-E354-48DB-BEB6-657A303A9BA6';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '160FEEDE-390D-4367-B799-F5A1A494B77E';
+                    this.formatting.offeredAnswer.qtnanswerID = '23B05F55-0C94-40E8-90EA-09A2768B1322';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //4. ภูมิลำเนาอยู่จังหวัด
                     answer = this.doFilter('province', datasource.new.provinces, 'id', dr.HomeProvince);
+                    
+                    if (answer !== null)
+                        answer = {
+                            ID: answer.ID
+                        }
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '62B4913B-9FEA-4EC8-8B4E-1C894154D7F1',
-                        qtnanswersetID: null,
-                        qtnanswerID: 'F164933D-FAB4-452B-95FC-1C0715C55FB7',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '62B4913B-9FEA-4EC8-8B4E-1C894154D7F1';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '5CCD5877-0F83-4916-BBCF-F445E7CCEA21';
+                    this.formatting.offeredAnswer.qtnanswerID = 'F164933D-FAB4-452B-95FC-1C0715C55FB7';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //5. สถานะการเกณฑ์ทหาร ( เฉพาะเพศชาย )
                     switch (dr.SoldierSts) {
@@ -593,18 +611,14 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-                    
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '654E54A8-19CD-4F98-BB2F-13C9746B3F6D',
-                        qtnanswersetID: '564B8E23-0FE8-45C9-A303-B84A7B0AE98F',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (dr.gender === 'F' ? 'N' : (answer !== null ? 'N' : 'Y'))
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '654E54A8-19CD-4F98-BB2F-13C9746B3F6D';
+                    this.formatting.offeredAnswer.errorStatus = (dr.gender === 'F' ? 'N' : (qtnanswerID !== null ? 'N' : 'Y'));
+                    this.formatting.offeredAnswer.qtnanswersetID = '564B8E23-0FE8-45C9-A303-B84A7B0AE98F';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //6. สถานะการเป็นนักบวช
                     switch (dr.MonkSts) {
@@ -633,18 +647,14 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '503D964B-0745-4597-B2F2-D84465F66507',
-                        qtnanswersetID: '0322A0CF-9F3C-45A7-BDB1-BBFDF7FEDA4E',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '503D964B-0745-4597-B2F2-D84465F66507';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '0322A0CF-9F3C-45A7-BDB1-BBFDF7FEDA4E';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //7. สถานภาพการทำงานปัจจุบัน
                     switch (dr.WorkSts) {
@@ -681,18 +691,14 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'F94EB6F6-938C-4929-9CD4-30E39AF922E7',
-                        qtnanswersetID: '6E835978-6BC6-491E-9E8B-75A9B70E2B8A',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = 'F94EB6F6-938C-4929-9CD4-30E39AF922E7';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '6E835978-6BC6-491E-9E8B-75A9B70E2B8A';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
                     //8. ประเภทงานที่ทำ
                     switch (dr.WorkType) {
@@ -725,7 +731,6 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
                     if (dr.WorkTypeOther !== null)
@@ -733,17 +738,15 @@ class Questionnaire {
                             value: dr.WorkTypeOther
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '59A0D811-B84E-4275-82AD-4CF2AD96F2F5',
-                        qtnanswersetID: '5B2F1FD9-1220-4CFE-92E8-5608D201F116',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '59A0D811-B84E-4275-82AD-4CF2AD96F2F5';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '5B2F1FD9-1220-4CFE-92E8-5608D201F116';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null,
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //9. ท่านคิดว่า ความรู้ความสามารถพิเศษด้านใดที่ช่วยให้ท่านได้ทำงาน
                     switch (dr.SkillType) {
                         case '1':
@@ -778,8 +781,7 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
+                    
                     answerOther = [];
 
                     if (dr.SkillTypeOther !== null)
@@ -787,16 +789,14 @@ class Questionnaire {
                             value: dr.SkillTypeOther
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '1E974E8C-C5DC-442B-A39D-9C96C7B2C563',
-                        qtnanswersetID: '17AA93E5-B3AF-4CAA-BD5B-6E8073CE7551',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '1E974E8C-C5DC-442B-A39D-9C96C7B2C563';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '17AA93E5-B3AF-4CAA-BD5B-6E8073CE7551';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
                     //10. ตำแหน่งงานที่ทำ
                     qtnanswerID = 'BCE0C112-7F15-413E-9AD1-C20B2F4CE316';
@@ -819,35 +819,29 @@ class Questionnaire {
                             });
                         }
                     }
-
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'C0A5FAF4-F7F1-4E67-A209-9206F4E762A3',
-                        qtnanswersetID: '75BBF9F2-71F6-4A92-B6C1-0FD687E6EA6C',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
                     
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'C0A5FAF4-F7F1-4E67-A209-9206F4E762A3';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '75BBF9F2-71F6-4A92-B6C1-0FD687E6EA6C';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+
                     //11. สถานที่ทำงานปัจจุบัน
                     // 1. ชื่อหน่วยงาน 
                     answer = dr.WorkInstitute;
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '8937D43E-6104-4767-B87A-98DA6026CE49',
-                        qtnanswersetID: null,
-                        qtnanswerID: 'A6561552-DCA4-4055-A6D5-F3E1697E4506',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.offeredAnswer.qtnquestionID = '8937D43E-6104-4767-B87A-98DA6026CE49';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '9E8A5AF7-68D7-49A3-8DCD-98D480B93CF3';
+                    this.formatting.offeredAnswer.qtnanswerID = 'A6561552-DCA4-4055-A6D5-F3E1697E4506';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //11. สถานที่ทำงานปัจจุบัน
                     // 2. ประเภทกิจการ
                     switch (dr.WorkInstituteType) {
@@ -919,19 +913,15 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '8937D43E-6104-4767-B87A-98DA6026CE49',
-                        qtnanswersetID: '0E6DA439-00DF-4DDC-8EAB-FF740D2357E5',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '8937D43E-6104-4767-B87A-98DA6026CE49';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '0E6DA439-00DF-4DDC-8EAB-FF740D2357E5';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //11. สถานที่ทำงานปัจจุบัน
                     // 3. ที่ตั้งสถานที่ทำงาน
                     address = {};
@@ -957,27 +947,35 @@ class Questionnaire {
                     answer = this.doFilter('country', datasource.new.countries, 'id', (dr.WorkCountry !== null ? dr.WorkCountry : '217'));
 
                     if (answer !== null)
-                        address['country'] = answer;
+                        address['country'] = {
+                            ID: answer.ID
+                        };
 
                     if (dr.WorkProvince !== null && dr.WorkProvince.length > 0) {
                         answer = this.doFilter('province', datasource.new.provinces, 'id', dr.WorkProvince);
 
                         if (answer !== null)
-                            address['province'] = answer;
+                            address['province'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.WorkDistrict !== null && dr.WorkDistrict.length > 0) {
                         answer = this.doFilter('district', datasource.new.districts, 'id', dr.WorkDistrict);
 
                         if (answer !== null)
-                            address['district'] = answer;
+                            address['district'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.WorkSubDistrict !== null && dr.WorkSubDistrict.length > 0) {
                         answer = this.doFilter('subdistrict', datasource.new.subdistricts, 'id', dr.WorkSubDistrict);
 
                         if (answer !== null) 
-                            address['subdistrict'] = answer;
+                            address['subdistrict'] = {
+                                ID: answer.ID
+                            };
                     } 
 
                     if (dr.WorkZip !== null && dr.WorkZip.length > 0)
@@ -995,16 +993,14 @@ class Questionnaire {
                     answer = (Object.keys(address).length > 0 ? address : null);
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '8937D43E-6104-4767-B87A-98DA6026CE49',
-                        qtnanswersetID: null,
-                        qtnanswerID: '5EDD90EB-B474-4887-8F07-820CDE66DE67',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-                    
+                    this.formatting.offeredAnswer.qtnquestionID = '8937D43E-6104-4767-B87A-98DA6026CE49';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '8167FD68-5883-4605-BF4D-05B98503427E';
+                    this.formatting.offeredAnswer.qtnanswerID = '5EDD90EB-B474-4887-8F07-820CDE66DE67';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+
                     //12. เงินเดือนหรือรายได้
                     switch (dr.IncomeSts) {
                         case '1':
@@ -1019,8 +1015,7 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
+
                     answerOther = [];
 
                     if (dr.IncomeAmt !== null)
@@ -1028,28 +1023,24 @@ class Questionnaire {
                             value: dr.IncomeAmt
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'BAE0A726-6025-419F-BFF7-C86DA550EB49',
-                        qtnanswersetID: 'C140580C-B5C4-4095-9F33-E58A5F2FC7F6',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'BAE0A726-6025-419F-BFF7-C86DA550EB49';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'C140580C-B5C4-4095-9F33-E58A5F2FC7F6';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
                     //13. เงินเดือนหรือรายได้ที่ท่านได้รับ ท่านเห็นว่ามีความเหมาะสมกับคุณวุฒิหรือสาขาวิชาที่สำเร็จการศึกษาหรือไม่
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '7D11FA2C-3E7F-4B3A-A63B-A9161BBF9AD4',
-                        qtnanswersetID: '6767BFDD-CF70-4FEF-B49D-60B7C3807F09',
-                        qtnanswerID: null,
-                        answer: null,
-                        answerOther: null,
-                        errorStatus: 'Y'
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '7D11FA2C-3E7F-4B3A-A63B-A9161BBF9AD4';
+                    this.formatting.offeredAnswer.errorStatus = 'Y';
+                    this.formatting.offeredAnswer.qtnanswersetID = '6767BFDD-CF70-4FEF-B49D-60B7C3807F09';
+                    this.formatting.offeredAnswer.qtnanswerID = null;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
                     //14. ท่านมีความพอใจต่องานที่ทำหรือไม่
                     switch (dr.NonSatisfyType) {
@@ -1083,8 +1074,6 @@ class Questionnaire {
 
                     if (answer !== null && answer.specify !== null && answer.specify.length > 0) {
                         if (answer.specify[0].items !== undefined) {
-                            let qtnanswerspecifyitems = answer.specify[0].items;
-                            
                             switch (dr.NonSatisfyType) {
                                 case '2':
                                 case '02':
@@ -1120,24 +1109,25 @@ class Questionnaire {
                             }
 
                             answerOther.push({
-                                value: this.doFilter('questionnaireAnswerSpecifyItem', qtnanswerspecifyitems, 'ID', qtnanswerID),
+                                ID: answer.ID,
+                                value: qtnanswerID,
                                 specify: dr.NonSatisfyOther
                             });
                         }
+
+                        qtnanswerID = answer.ID;
                     }
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '68D75734-1992-4C19-BCF3-920DE6CDEF61',
-                        qtnanswersetID: '886023B2-86B5-435B-9E35-C3AE113539F1',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
-                    //15. หลังจากสำเร็จการศึกษาแล้ว ท่านได้งานทำในระยะเวลาเท่าไร 
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '68D75734-1992-4C19-BCF3-920DE6CDEF61';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '886023B2-86B5-435B-9E35-C3AE113539F1';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID,
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
+                    //15. หลังจากสำเร็จการศึกษาแล้ว ท่านได้งานทำในระยะเวลาเท่าไร
                     switch (dr.GetWorkTime) {
                         case '1':
                         case '01':
@@ -1172,19 +1162,15 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '08A5E48F-17A6-4C7B-8896-0C39A6FA5C14',
-                        qtnanswersetID: 'F1392DF7-3ADF-4973-91AE-B1CFEF70CC5B',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '08A5E48F-17A6-4C7B-8896-0C39A6FA5C14';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'F1392DF7-3ADF-4973-91AE-B1CFEF70CC5B';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //16. ท่านได้งานทำด้วยวิธีใด
                     switch (dr.HowGetJob) {
                         case '1':
@@ -1215,8 +1201,7 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
+
                     answerOther = [];
 
                     if (dr.HowGetJobOther !== null)
@@ -1224,17 +1209,15 @@ class Questionnaire {
                             value: dr.HowGetJobOther
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'C574E67E-A9CC-4990-A52C-38C4C3F2698B',
-                        qtnanswersetID: 'C5F576BD-1551-494B-A559-4AEABBD76860',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'C574E67E-A9CC-4990-A52C-38C4C3F2698B';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'C5F576BD-1551-494B-A559-4AEABBD76860';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //17. ลักษณะงานที่ทำตรงกับสาขาที่ท่านได้สำเร็จการศึกษาหรือไม่
                     switch (dr.CareerRelateEdSts) {
                         case '1':
@@ -1249,20 +1232,16 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                        
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '65EFB2BA-7894-458D-A608-249DD4AA03BD',
-                        qtnanswersetID: '065A87D2-8236-4172-86DA-7C678E4F89E4',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '65EFB2BA-7894-458D-A608-249DD4AA03BD';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '065A87D2-8236-4172-86DA-7C678E4F89E4';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //18. ท่านสามารถนำความรู้จากสาขาวิชาที่เรียนมาประยุกต์ใช้กับหน้าที่การงานที่ทำอยู่ขณะนี้เพียงใด
                     switch (dr.ApplyLevel) {
                         case '1':
@@ -1289,19 +1268,15 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                        
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '9C1EC3E4-0518-416F-8A0B-F28F44B4B536',
-                        qtnanswersetID: 'E8F41951-C9AB-473C-93CA-CCE29A3C6FF6',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '9C1EC3E4-0518-416F-8A0B-F28F44B4B536';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'E8F41951-C9AB-473C-93CA-CCE29A3C6FF6';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //19. การศึกษาต่อ
                     switch (dr.FurtherStudySts) {
@@ -1318,19 +1293,15 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'A7613F98-4009-4D35-B7AA-42ED07FC545B',
-                        qtnanswersetID: 'C50B22BD-771B-4D31-B521-9C29A525DE10',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'A7613F98-4009-4D35-B7AA-42ED07FC545B';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'C50B22BD-771B-4D31-B521-9C29A525DE10';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //20. สาเหตุที่ยังไม่ได้ทำงาน โปรดระบุสาเหตุที่สำคัญ 1 ข้อ ต่อไปนี้
                     switch (dr.NotWorkReason) {
                         case '1': 
@@ -1358,7 +1329,6 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
                     if (dr.NotWorkOther !== null)
@@ -1366,16 +1336,14 @@ class Questionnaire {
                             value: dr.NotWorkOther
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '36210D2E-69D6-4572-A7C2-ACEEBF7890B7',
-                        qtnanswersetID: '9D7CD702-9AA9-4D5A-AC90-146843EBBD9F',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '36210D2E-69D6-4572-A7C2-ACEEBF7890B7';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '9D7CD702-9AA9-4D5A-AC90-146843EBBD9F';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //21. ท่านมีปัญหาในการหางานทำหลังสำเร็จการศึกษาหรือไม่ 
                     switch (dr.FindJobProblem) {
@@ -1418,8 +1386,6 @@ class Questionnaire {
 
                     if (answer !== null && answer.specify !== null && answer.specify.length > 0) {
                         if (answer.specify[0].items !== undefined) {
-                            let qtnanswerspecifyitems = answer.specify[0].items;
-                            
                             switch (dr.FindJobProblem) {
                                 case '2':
                                 case '02':
@@ -1476,27 +1442,26 @@ class Questionnaire {
                                     qtnanswerID = null;
                                     break
                             }
-                            
-                            qtnanswerspecifyitem = this.doFilter('questionnaireAnswerSpecifyItem', qtnanswerspecifyitems, 'ID', qtnanswerID)
 
                             answerOther.push({
-                                value: (qtnanswerspecifyitem !== null ? [qtnanswerspecifyitem] : qtnanswerspecifyitem),
+                                ID: answer.ID,
+                                value: (qtnanswerID !== null ? [qtnanswerID] : qtnanswerID),
                                 specify: dr.FindJobProblemOther
                             });
                         }
-                    }
-                    
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'C84659AA-0C02-425F-87A4-FE2B16E8C589',
-                        qtnanswersetID: 'C9DBEB3E-A11B-4A25-A49F-398A2D9D49B5',
-                        qtnanswerID: null,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
 
+                        qtnanswerID = answer.ID;
+                    }
+
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'C84659AA-0C02-425F-87A4-FE2B16E8C589';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'C9DBEB3E-A11B-4A25-A49F-398A2D9D49B5';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //22. ความต้องการทำงาน
                     switch (dr.Oversea) {
                         case '1':
@@ -1512,49 +1477,52 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
-                    if (dr.OverseaCountry !== null)
-                        answerOther.push({
-                            value: this.doFilter('country', datasource.new.countries, 'id', dr.OverseaCountry)
-                        });
+                    if (dr.OverseaCountry !== null) {
+                        let country = Object.assign({}, this.doFilter('country', datasource.new.countries, 'id', dr.OverseaCountry));
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'D97B9247-2BA2-4A3D-9E4E-348E15DC9EC2',
-                        qtnanswersetID: 'D13D1898-4EBC-4D72-B526-0C77F4C69CF8',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                        if (country !== null && country.ID !== undefined)
+                            answerOther.push({
+                                value: {
+                                    ID: country.ID
+                                }
+                            });
+                    }
 
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'D97B9247-2BA2-4A3D-9E4E-348E15DC9EC2';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'D13D1898-4EBC-4D72-B526-0C77F4C69CF8';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //23. ตำแหน่งที่ต้องการทำงาน
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'D0B21F98-E468-4916-AC09-DE9F65F02B6F',
-                        qtnanswersetID: null,
-                        qtnanswerID: '88170CC4-4054-467D-B2F6-93886B4429D5',
-                        answer: dr.PreferPosition,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    answer = dr.PreferPosition;
 
+                    this.formatting.data = null;
+                    this.formatting.offeredAnswer.qtnquestionID = 'D0B21F98-E468-4916-AC09-DE9F65F02B6F';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'F261FB0E-B698-4EDD-8BC3-13679CF85BDC';
+                    this.formatting.offeredAnswer.qtnanswerID = '88170CC4-4054-467D-B2F6-93886B4429D5';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //24. ความต้องการพัฒนาทักษะ หลักสูตร
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'C63C0784-30C8-4233-97D0-7B363092C4CC',
-                        qtnanswersetID: null,
-                        qtnanswerID: '0415BA6A-4E6E-481B-86EF-F02730FF8F4D',
-                        answer: dr.ImproveSkill,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    answer = dr.ImproveSkill;
 
+                    this.formatting.data = null;
+                    this.formatting.offeredAnswer.qtnquestionID = 'C63C0784-30C8-4233-97D0-7B363092C4CC';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '0725016B-74C0-4DA7-B7ED-E8C4CFF76ADD';
+                    this.formatting.offeredAnswer.qtnanswerID = '0415BA6A-4E6E-481B-86EF-F02730FF8F4D';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //25. ความประสงค์ในการเปิดเผยข้อมูลแก่นายจ้าง / สถานประกอบการ เพื่อพิจารณาบรรจุงาน
                     switch (dr.RevealInfo) {
                         case '0':
@@ -1575,14 +1543,12 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
+
                     answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
                     if (answer !== null && answer.specify !== null && answer.specify.length > 0) {
                         if (answer.specify[0].items !== undefined) {
-                            let qtnanswerspecifyitems = answer.specify[0].items;
-
                             switch (dr.RevealInfo) {
                                 case '1':
                                 case '01':
@@ -1606,22 +1572,23 @@ class Questionnaire {
                             }
 
                             answerOther.push({
-                                value: this.doFilter('questionnaireAnswerSpecifyItem', qtnanswerspecifyitems, 'ID', qtnanswerID),
+                                ID: answer.ID,
+                                value: qtnanswerID
                             });
                         }
+
+                        qtnanswerID = answer.ID;
                     }
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '3B21618B-DB37-40F7-A6B1-EE0FC11C7652',
-                        qtnanswersetID: '8FF49A7A-2937-49AD-847D-D1CD16587CD8',
-                        qtnanswerID: null,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '3B21618B-DB37-40F7-A6B1-EE0FC11C7652';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '8FF49A7A-2937-49AD-847D-D1CD16587CD8';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //26. การศึกษาต่อ 
                     switch (dr.FurtherStudySts) {
                         case '1': 
@@ -1637,19 +1604,15 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '4A7556CD-B9D9-4412-8653-2CA1306D27CD',
-                        qtnanswersetID: '23BABA35-8F8B-4070-9A80-058ABC896B6E',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '4A7556CD-B9D9-4412-8653-2CA1306D27CD';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '23BABA35-8F8B-4070-9A80-058ABC896B6E';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //27. ระดับการศึกษาที่ท่านต้องการศึกษาต่อ / กำลังศึกษาต่อ
                     switch (dr.FurtherStudyLevel) {
                         case '4':
@@ -1685,7 +1648,6 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
                     if (dr.OtherStudyLevel !== null)
@@ -1693,17 +1655,15 @@ class Questionnaire {
                             value: dr.OtherStudyLevel
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '829679C9-01D1-428D-8771-8AA3667270B7',
-                        qtnanswersetID: 'BB82917E-1B6A-4929-BBD2-7FE705C546AB',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '829679C9-01D1-428D-8771-8AA3667270B7';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'BB82917E-1B6A-4929-BBD2-7FE705C546AB';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //28. สาขาวิชาที่ท่านต้องการศึกษาต่อ / กำลังศึกษาต่อ 
                     switch (dr.FurtherProgramFlag) {
                         case '1':
@@ -1719,24 +1679,21 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
                     answerOther = [];
 
                     if (dr.FurtherStudyProgram !== null)
                         answerOther.push({
                             value: dr.furtherStudyProgramName
                         });
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'BA37072A-82B8-4653-AF5E-367105FFEEA7',
-                        qtnanswersetID: '2383CE26-4628-4B4E-9A5D-6B4B9081A545',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'BA37072A-82B8-4653-AF5E-367105FFEEA7';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '2383CE26-4628-4B4E-9A5D-6B4B9081A545';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
                     //29. ประเภทของสถาบันการศึกษา / มหาวิทยาลัยที่ท่านต้องการศึกษา / กำลังศึกษาต่อ
                     // 1. ประเภทของสถาบันการศึกษา / มหาวิทยาลัยที่ท่านต้องการศึกษา 
@@ -1758,34 +1715,28 @@ class Questionnaire {
                             break;
                     }
 
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '4CFDC1D7-0B8F-43D5-9F8F-3C4E8B96ED37',
-                        qtnanswersetID: 'DA33DD61-8DD7-4F24-BE94-64BE2B8E5B8D',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '4CFDC1D7-0B8F-43D5-9F8F-3C4E8B96ED37';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'DA33DD61-8DD7-4F24-BE94-64BE2B8E5B8D';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //29. สถานที่ทำงานปัจจุบัน
                     // 2. ชื่อของสถาบันการศึกษา / มหาวิทยาลัยที่ท่านต้องการศึกษา
                     answer = dr.FurtherStudyUniv;
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '4CFDC1D7-0B8F-43D5-9F8F-3C4E8B96ED37',
-                        qtnanswersetID: null,
-                        qtnanswerID: '99541F6C-E182-4897-B878-531D5FAF903F',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
+                    this.formatting.offeredAnswer.qtnquestionID = '4CFDC1D7-0B8F-43D5-9F8F-3C4E8B96ED37';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y')
+                    this.formatting.offeredAnswer.qtnanswersetID = '3DF1F1F5-33D4-40D9-B16B-38957C52F1E9';
+                    this.formatting.offeredAnswer.qtnanswerID = '99541F6C-E182-4897-B878-531D5FAF903F';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
                     //30. เหตุผลที่ทำให้ท่านตัดสินใจศึกษาต่อ
                     switch (dr.FurtherStudyReason) {
                         case '1':
@@ -1812,25 +1763,22 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
+
                     answerOther = [];
-                    
+
                     if (dr.OtherReason !== null)
                         answerOther.push({
                             value: dr.OtherReason
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'B307108F-63FF-4F3D-9034-02504D91717F',
-                        qtnanswersetID: 'E896724A-D557-4FAA-89A3-0913BFD76AC6',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'B307108F-63FF-4F3D-9034-02504D91717F';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'E896724A-D557-4FAA-89A3-0913BFD76AC6',
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //31. ท่านมีปัญหาในการศึกษาต่อหรือไม่
                     switch (dr.FurtherStudyProblem) {
@@ -1859,9 +1807,7 @@ class Questionnaire {
                     answerOther = [];
 
                     if (answer !== null && answer.specify !== null && answer.specify.length > 0) {
-                        if (answer.specify[0].items !== undefined) {
-                            let qtnanswerspecifyitems = answer.specify[0].items;
-                            
+                        if (answer.specify[0].items !== undefined) {                            
                             switch (dr.FurtherStudyProblem) {
                                 case '2':
                                 case '02':
@@ -1888,32 +1834,31 @@ class Questionnaire {
                                     break
                             }
 
-                            qtnanswerspecifyitem = this.doFilter('questionnaireAnswerSpecifyItem', qtnanswerspecifyitems, 'ID', qtnanswerID)
-
                             answerOther.push({
-                                value: (qtnanswerspecifyitem !== null ? [qtnanswerspecifyitem] : qtnanswerspecifyitem),
+                                ID: answer.ID,
+                                value: (qtnanswerID !== null ? [qtnanswerID] : qtnanswerID),
                                 specify: dr.FurtherStudyProbOther
                             });
                         }
+
+                        qtnanswerID = answer.ID;
                     }
-                    
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '13C15528-8AE1-4776-ABE8-B194947CEF1D',
-                        qtnanswersetID: '7CD6C46B-BAD8-4CEC-BFFA-9D5EFFCAA144',
-                        qtnanswerID: null,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '13C15528-8AE1-4776-ABE8-B194947CEF1D';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '7CD6C46B-BAD8-4CEC-BFFA-9D5EFFCAA144';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID,
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //32. ท่านมีปัญหาในการศึกษาต่อหรือไม่
                     answer = [];
 
                     ['englishskill', 'compskill', 'accountingskill', 'internetskill', 'practiceskill', 'researchskill', 'chineseskill', 'asianskill', 'otherskill'].forEach((skill) => {
                         qtnanswerID = null;
-
+                        
                         switch (skill) {
                             case 'englishskill':
                                 if (dr.EnglishSkill === '1')
@@ -1956,30 +1901,26 @@ class Questionnaire {
                                 break;
                         }
 
-                        qtnanswer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                        if (qtnanswer !== null)
-                            answer.push(qtnanswer);
+                        if (qtnanswerID !== null)
+                            answer.push(qtnanswerID);
                     });
 
                     answer = (answer.length > 0 ? answer : null);
                     answerOther = [];
-
+                    
                     if (dr.SpecificOtherSkill !== null)
                         answerOther.push({
                             value: dr.SpecificOtherSkill
                         });
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '86F07BF5-594C-45ED-BB42-C9F3956A07DE',
-                        qtnanswersetID: '0F782058-9273-4E9F-A7D3-74CC2C9D03EB',
-                        qtnanswerID: null,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '86F07BF5-594C-45ED-BB42-C9F3956A07DE';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '0F782058-9273-4E9F-A7D3-74CC2C9D03EB';
+                    this.formatting.offeredAnswer.qtnanswerID = answer;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //33. ความเหมาะสมของหลักสูตรที่ท่านจบการศึกษาในการประกอบอาชีพ
                     ['groupcoursesrequired', 'coursegroupupdate', 'groupcoursesdonotteach', 'moregroupcourses', 'strengthcourse', 'weaknessescourse'].forEach((course) => {
@@ -2015,60 +1956,52 @@ class Questionnaire {
                                 answer = null;
                                 break;
                         }
-                        
+
                         this.formatting.data = null;
-                        this.formatting.qtnanswered = {
-                            qtnquestionID: '513A79C7-C4B5-4EAF-9575-75A90BE932DB',
-                            qtnanswersetID: null,
-                            qtnanswerID: qtnanswerID,
-                            answer: answer,
-                            answerOther: null,
-                            errorStatus: (answer !== null ? 'N' : 'Y')
-                        };
-                        qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                        this.formatting.offeredAnswer.qtnquestionID = '513A79C7-C4B5-4EAF-9575-75A90BE932DB';
+                        this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                        this.formatting.offeredAnswer.qtnanswersetID = '1CB48F6C-B70F-4521-9B4A-E752F2794AD2';
+                        this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                        this.formatting.offeredAnswer.answer = answer;
+                        this.formatting.offeredAnswer.answerOther = null;
+                        offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     });
 
                     //34. ข้อเสนอแนะเกี่ยวกับหลักสูตรและสาขาวิชาที่เรียน
                     answer = dr.ProgramComment;
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '77854DD5-2770-42A8-94A6-1E5975589507',
-                        qtnanswersetID: null,
-                        qtnanswerID: '00C73F67-C5F3-4418-853D-613756A61687',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '77854DD5-2770-42A8-94A6-1E5975589507';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '530439CF-6AD1-446F-B69B-71D887258DFE';
+                    this.formatting.offeredAnswer.qtnanswerID = '00C73F67-C5F3-4418-853D-613756A61687';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //35. ข้อเสนอแนะเกี่ยวกับการเรียนการสอน
                     answer = dr.StudyingComment;
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '552AE37C-90FF-4B18-B0CC-7DA944DD7665',
-                        qtnanswersetID: null,
-                        qtnanswerID: '91C50E29-4A74-4BF5-BB01-075FF13C88F1',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = '552AE37C-90FF-4B18-B0CC-7DA944DD7665';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '89956446-ED1A-46AB-AFC2-99CBE07AD78B';
+                    this.formatting.offeredAnswer.qtnanswerID = '91C50E29-4A74-4BF5-BB01-075FF13C88F1';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //36. ข้อเสนอแนะเกี่ยวกับกิจกรรมพัฒนานักศึกษา
                     answer = dr.ActivityComment;
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'F2D9AE98-5F72-4294-BF53-50ED26243C97',
-                        qtnanswersetID: null,
-                        qtnanswerID: 'C4F38E90-7F84-4B78-97B5-E9A897EA3998',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = 'F2D9AE98-5F72-4294-BF53-50ED26243C97';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '9F7010EE-A2FF-438E-A6F5-0F45ED6B8357';
+                    this.formatting.offeredAnswer.qtnanswerID = 'C4F38E90-7F84-4B78-97B5-E9A897EA3998';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //37. ถ้ามีผู้ขอคำแนะนำในการเลือกสถาบันการศึกษาท่านจะแนะนำให้เรียนที่มหาวิทยาลัยมหิดล
                     switch (dr.SuggestMUsts) {
@@ -2096,19 +2029,15 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
 
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '90128514-FF80-4786-A021-19CB5CC7F298',
-                        qtnanswersetID: '7F201584-4CC9-409F-8652-C42F3B5138F3',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '90128514-FF80-4786-A021-19CB5CC7F298';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '7F201584-4CC9-409F-8652-C42F3B5138F3';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //38. สถานที่ที่ต้องการให้มหาวิทยาลัยมหิดล ส่งข่าวสาร
                     // 1. สถานที่
@@ -2129,20 +2058,16 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
+
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = 'FCF8A3BF-DF29-4983-AFDB-858DF59004AC';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '116E1B27-6907-4412-A98C-D14F1BF8475A';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
-
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'FCF8A3BF-DF29-4983-AFDB-858DF59004AC',
-                        qtnanswersetID: '116E1B27-6907-4412-A98C-D14F1BF8475A',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
-
                     //38. สถานที่ที่ต้องการให้มหาวิทยาลัยมหิดล ส่งข่าวสาร
                     // 2. ที่อยู่
                     address = {};
@@ -2168,27 +2093,35 @@ class Questionnaire {
                     answer = this.doFilter('country', datasource.new.countries, 'id', (dr.AlumniCountry !== null ? dr.AlumniCountry : '217'));
                     
                     if (answer !== null)
-                        address['country'] = answer;
+                        address['country'] = {
+                            ID: answer.ID
+                        };
 
                     if (dr.AlumniProvince !== null && dr.AlumniProvince.length > 0) {
                         answer = this.doFilter('province', datasource.new.provinces, 'id', dr.AlumniProvince);
 
                         if (answer !== null)
-                            address['province'] = answer;
+                            address['province'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.AlumniDistrict !== null && dr.AlumniDistrict.length > 0) {
                         answer = this.doFilter('district', datasource.new.districts, 'id', dr.AlumniDistrict);
 
                         if (answer !== null)
-                            address['district'] = answer;
+                            address['district'] = {
+                                ID: answer.ID
+                            };
                     }
 
                     if (dr.AlumniSubDist !== null && dr.AlumniSubDist.length > 0) {
                         answer = this.doFilter('subdistrict', datasource.new.subdistricts, 'id', dr.AlumniSubDist);
 
                         if (answer !== null) 
-                            address['subdistrict'] = answer;
+                            address['subdistrict'] = {
+                                ID: answer.ID
+                            };
                     } 
 
                     if (dr.AlumniZipcode !== null && dr.AlumniZipcode.length > 0)
@@ -2209,15 +2142,13 @@ class Questionnaire {
                     answer = (Object.keys(address).length > 0 ? address : null);
 
                     this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: 'FCF8A3BF-DF29-4983-AFDB-858DF59004AC',
-                        qtnanswersetID: null,
-                        qtnanswerID: 'E9D7F386-8661-46E0-8EC1-F6806C61C4CB',
-                        answer: answer,
-                        answerOther: null,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
+                    this.formatting.offeredAnswer.qtnquestionID = 'FCF8A3BF-DF29-4983-AFDB-858DF59004AC';
+                    this.formatting.offeredAnswer.errorStatus = (answer !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = 'C2D86C0E-A744-4A49-AAE1-A1A20CBF756B';
+                    this.formatting.offeredAnswer.qtnanswerID = 'E9D7F386-8661-46E0-8EC1-F6806C61C4CB';
+                    this.formatting.offeredAnswer.answer = answer;
+                    this.formatting.offeredAnswer.answerOther = null;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
 
                     //39. กิจกรรมที่ท่านต้องการให้มหาวิทยาลัยจัดให้ศิษย์เก่า คือ
                     switch (dr.AlumniActivity) {
@@ -2245,38 +2176,35 @@ class Questionnaire {
                             qtnanswerID = null;
                             break;
                     }
-                    
-                    answer = this.doFilter('questionnaireAnswer', datasource.new.qtnanswers, 'ID', qtnanswerID);
+
                     answerOther = [];
-                    
+
                     if (dr.AlumniComment !== null)
                         answerOther.push({
                             value: dr.AlumniComment
                         });
-                    
-                    this.formatting.data = null;
-                    this.formatting.qtnanswered = {
-                        qtnquestionID: '47BE8AD9-5BAE-49B0-B870-60E1549D5B54',
-                        qtnanswersetID: '608CC0FB-4C71-4802-B2FA-5684A3D4CA47',
-                        qtnanswerID: qtnanswerID,
-                        answer: answer,
-                        answerOther: answerOther,
-                        errorStatus: (answer !== null ? 'N' : 'Y')
-                    };
-                    qtnanswered.push(this.formatting.questionnaireAnswered.doSet());
 
-                    let qtnanswered2str = JSON.stringify(qtnanswered);
-                    let qtnansweredsets = [null, null, null, null, null, null, null, null, null, null];
+                    this.formatting.data = datasource.new.qtnanswers;
+                    this.formatting.offeredAnswer.qtnquestionID = '47BE8AD9-5BAE-49B0-B870-60E1549D5B54';
+                    this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
+                    this.formatting.offeredAnswer.qtnanswersetID = '608CC0FB-4C71-4802-B2FA-5684A3D4CA47';
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
+                    this.formatting.offeredAnswer.answer = null;
+                    this.formatting.offeredAnswer.answerOther = answerOther;
+                    offeredAnswer.push(this.formatting.offeredAnswer.doSet());
+                    
+                    let offeredanswer2str = JSON.stringify(offeredAnswer);
+                    let offeredanswersets = [null, null, null, null, null, null, null, null, null, null];
                     let start = 0;
                     let end = 0;
                     let i = 0;
         
-                    while(end < qtnanswered2str.length) {
+                    while(end < offeredanswer2str.length) {
                         start = end;
                         end = end + 4000;
-                        end = (end > qtnanswered2str.length ? qtnanswered2str.length : end);
+                        end = (end > offeredanswer2str.length ? offeredanswer2str.length : end);
         
-                        qtnansweredsets[i] = qtnanswered2str.substring(start, end);
+                        offeredanswersets[i] = offeredanswer2str.substring(start, end);
         
                         i++;
                     }
@@ -2329,16 +2257,16 @@ class Questionnaire {
                             raceNameEN: (dr.raceNameEN !== null ? dr.raceNameEN.toUpperCase() : null),
                             race2Letter: dr.race2Letter,
                             race3Letter: dr.race3Letter,
-                            empQuestionnaireAnswer01: qtnansweredsets[0],
-                            empQuestionnaireAnswer02: qtnansweredsets[1],
-                            empQuestionnaireAnswer03: qtnansweredsets[2],
-                            empQuestionnaireAnswer04: qtnansweredsets[3],
-                            empQuestionnaireAnswer05: qtnansweredsets[4],
-                            empQuestionnaireAnswer06: qtnansweredsets[5],
-                            empQuestionnaireAnswer07: qtnansweredsets[6],
-                            empQuestionnaireAnswer08: qtnansweredsets[7],
-                            empQuestionnaireAnswer09: qtnansweredsets[8],
-                            empQuestionnaireAnswer10: qtnansweredsets[9],
+                            offeredAnswer01: offeredanswersets[0],
+                            offeredAnswer02: offeredanswersets[1],
+                            offeredAnswer03: offeredanswersets[2],
+                            offeredAnswer04: offeredanswersets[3],
+                            offeredAnswer05: offeredanswersets[4],
+                            offeredAnswer06: offeredanswersets[5],
+                            offeredAnswer07: offeredanswersets[6],
+                            offeredAnswer08: offeredanswersets[7],
+                            offeredAnswer09: offeredanswersets[8],
+                            offeredAnswer10: offeredanswersets[9],
                             submitStatus: 'N',
                             cancelStatus: 'N',
                             actionDate: dr.createdDate,

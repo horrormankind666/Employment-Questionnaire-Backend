@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๓/๐๓/๒๕๖๕>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๔/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -107,7 +107,6 @@ class Schema {
                 race2Letter,
                 race3Letter
             },
-            empQuestionnaireAnswer,
             submitStatus,
             cancelStatus,
             actionDate,
@@ -116,11 +115,30 @@ class Schema {
             this.ID = ID,
             this.empQuestionnaireSetID = empQuestionnaireSetID,
             this.userInfo = userInfo,
-            this.empQuestionnaireAnswer = empQuestionnaireAnswer,
             this.submitStatus = submitStatus,
             this.cancelStatus = cancelStatus,
             this.actionDate = actionDate,
             this.doneDate = doneDate
+        }
+    };
+
+    QuestionnaireAnswered = class { 
+        constructor(
+            ID,
+            empQuestionnaireDoneID,
+            empQuestionnaireQuestionID,
+            errorStatus,
+            empQuestionnaireAnswerSetID,
+            answer,
+            actionDate
+        ) {
+            this.ID = ID,
+            this.empQuestionnaireDoneID = empQuestionnaireDoneID,
+            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID,
+            this.errorStatus = errorStatus,
+            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
+            this.answer = answer,
+            this.actionDate = actionDate
         }
     };
 
@@ -239,6 +257,7 @@ class Schema {
     QuestionnaireDoneAndSet = class {
         constructor(
             done,
+            answered,
             set,
             sections,
             questions,
@@ -246,6 +265,7 @@ class Schema {
             answers
         ) {
             this.done = done,
+            this.answered = answered,
             this.set = set,
             this.sections = sections,
             this.questions = questions,

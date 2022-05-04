@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๐๔/๐๕/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -14,14 +14,17 @@ const util = require('../util');
 const schema = require('./schema');
 
 class QuestionnaireDoneAndSet {
-    async doGetList(PPID) {
+    async doGetList(
+         perPersonID,
+         studentCode) {
         let conn;
         let connRequest;
-        
+
         try {
             conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
             connRequest = conn.request();
-            connRequest.input('PPID', sql.VarChar, PPID);
+            connRequest.input('perPersonID', sql.VarChar, perPersonID);
+            connRequest.input('studentCode', sql.VarChar, studentCode);
         }
         catch {
         }
@@ -66,7 +69,8 @@ class QuestionnaireDoneAndSet {
     async doGet(
         questionnaireDoneID,
         questionnaireSetID,
-        PPID
+        perPersonID,
+        studentCode
     ) {
         let conn;
         let connRequest;
@@ -76,7 +80,8 @@ class QuestionnaireDoneAndSet {
             connRequest = conn.request();
             connRequest.input('empQuestionnaireDoneID', sql.VarChar, questionnaireDoneID);
             connRequest.input('empQuestionnaireSetID', sql.VarChar, questionnaireSetID);
-            connRequest.input('PPID', sql.VarChar, PPID);
+            connRequest.input('perPersonID', sql.VarChar, perPersonID);
+            connRequest.input('studentCode', sql.VarChar, studentCode);
         }
         catch {
         }
@@ -84,6 +89,7 @@ class QuestionnaireDoneAndSet {
         let data = await util.db.doExecuteStoredProcedure(connRequest, 'sp_empGetQuestionnaireDoneAndSet');
         let ds = [];
         let qtndone = null;
+        let qtnanswered = [];
         let qtnset = null;
         let qtnsections = [];
         let qtnquestions = [];
@@ -164,7 +170,6 @@ class QuestionnaireDoneAndSet {
                         race2Letter: dr.race2Letter,
                         race3Letter: dr.race3Letter
                     },
-                    JSON.parse(dr.empQuestionnaireAnswer),
                     dr.submitStatus,
                     dr.cancelStatus,
                     dr.actionDate,
@@ -173,6 +178,18 @@ class QuestionnaireDoneAndSet {
             });
             
             data.dataset[1].forEach(dr => {
+                qtnanswered.push(new schema.QuestionnaireAnswered(
+                    dr.ID,
+                    dr.empQuestionnaireDoneID,
+                    dr.empQuestionnaireQuestionID,
+                    dr.errorStatus,
+                    dr.empQuestionnaireAnswerSetID,
+                    JSON.parse(dr.answer),
+                    dr.actionDate
+                ));
+            });
+
+            data.dataset[2].forEach(dr => {
                 qtnset = new schema.QuestionnaireSet(
                     dr.ID,
                     dr.year,
@@ -198,7 +215,7 @@ class QuestionnaireDoneAndSet {
                 );
             });
 
-            data.dataset[2].forEach(dr => {
+            data.dataset[3].forEach(dr => {
                 qtnsections.push(new schema.QuestionnaireSection(
                     dr.ID,
                     dr.empQuestionnaireSetID,
@@ -216,7 +233,7 @@ class QuestionnaireDoneAndSet {
                 ));
             });
 
-            data.dataset[3].forEach(dr => {
+            data.dataset[4].forEach(dr => {
                 qtnquestions.push(new schema.QuestionnaireQuestion(
                     dr.ID,
                     dr.empQuestionnaireSectionID,
@@ -234,7 +251,7 @@ class QuestionnaireDoneAndSet {
                 ));
             });
 
-            data.dataset[4].forEach(dr => {
+            data.dataset[5].forEach(dr => {
                 qtnanswersets.push(new schema.QuestionnaireAnswerSet(
                     dr.ID,
                     dr.empQuestionnaireQuestionID,
@@ -248,7 +265,7 @@ class QuestionnaireDoneAndSet {
                 ));
             });
 
-            data.dataset[5].forEach(dr => {
+            data.dataset[6].forEach(dr => {
                 qtnanswers.push(new schema.QuestionnaireAnswer(
                     dr.ID,
                     dr.empQuestionnaireAnswerSetID,
@@ -272,6 +289,7 @@ class QuestionnaireDoneAndSet {
 
         ds.push(new schema.QuestionnaireDoneAndSet(
             qtndone,
+            qtnanswered,
             qtnset,
             qtnsections,
             qtnquestions,
@@ -305,9 +323,9 @@ class QuestionnaireDone {
 
         let data = await util.db.doExecuteStoredProcedure(connRequest, 'sp_empSetQuestionnaireDone');
         let ds = [];
-
+        
         if (data.dataset.length > 0)
-            ds = data.dataset[0];
+            ds = data.dataset;
 
         data.dataset = ds;
         util.db.doConnClose(conn);

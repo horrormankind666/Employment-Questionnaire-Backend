@@ -2,7 +2,7 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๗/๐๑/๒๕๖๕>
-Modify date : <๒๘/๐๑/๒๕๖๕>
+Modify date : <๐๒/๐๕/๒๕๖๕>
 Description : <>
 =============================================
 */
@@ -19,8 +19,13 @@ const router = express.Router();
 
 router.post('/Get', (req, res, next) => {
     let CUIDInfos = util.doParseCUID(req.body.CUID);
-    let redirectURL = (CUIDInfos !== null ? (CUIDInfos[0].length > 0 ? CUIDInfos[0] : null) : null);
-    let code = (CUIDInfos !== null ? (CUIDInfos[1].length > 0 ? CUIDInfos[1] : null) : null);
+    let redirectURL = null;
+    let code = null;
+
+    if (CUIDInfos !== null) {
+        redirectURL = (CUIDInfos[0].length > 0 ? CUIDInfos[0] : null);
+        code = (CUIDInfos[1].length > 0 ? CUIDInfos[1] : null);
+    }
 
     let options = {
         'url': 'https://idp.mahidol.ac.th/adfs/oauth2/token',
