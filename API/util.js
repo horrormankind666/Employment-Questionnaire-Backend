@@ -219,8 +219,8 @@ class Authorization {
 
 class Util {
     constructor() {
-        this.db = new DB(),
-        this.authorization = new Authorization()
+        this.db = new DB();
+        this.authorization = new Authorization();
     }
 
     doGetAPIMessage(

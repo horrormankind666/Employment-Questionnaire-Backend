@@ -336,8 +336,8 @@ class QuestionnaireDone {
 
 class Questionnaire {
     constructor() {
-        this.doneandset = new QuestionnaireDoneAndSet(),
-        this.done = new QuestionnaireDone()
+        this.doneandset = new QuestionnaireDoneAndSet();
+        this.done = new QuestionnaireDone();
     }
 }
 
