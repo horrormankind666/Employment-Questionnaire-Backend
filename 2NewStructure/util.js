@@ -147,8 +147,8 @@ class Spinner {
 
 class Util {
     constructor() {
-        this.db = new DB(),
-        this.spinner = new Spinner()
+        this.db = new DB();
+        this.spinner = new Spinner();
     }
 }
 

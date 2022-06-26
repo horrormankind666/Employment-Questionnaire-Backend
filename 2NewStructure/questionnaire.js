@@ -466,8 +466,6 @@ class Questionnaire {
 
             if (datasource.new.qtnanswers.length > 0) {
                 let qtndone;
-                let qtnanswer;
-                let qtnanswerspecifyitem;
                 let qtnanswerID;
                 let address;
                 let answer;
@@ -742,7 +740,7 @@ class Questionnaire {
                     this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
                     this.formatting.offeredAnswer.qtnanswersetID = '5B2F1FD9-1220-4CFE-92E8-5608D201F116';
                     this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
-                    this.formatting.offeredAnswer.answer = null,
+                    this.formatting.offeredAnswer.answer = null;
                     this.formatting.offeredAnswer.answerOther = answerOther;
                     offeredAnswer.push(this.formatting.offeredAnswer.doSet());
                     
@@ -1121,7 +1119,7 @@ class Questionnaire {
                     this.formatting.offeredAnswer.qtnquestionID = '68D75734-1992-4C19-BCF3-920DE6CDEF61';
                     this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
                     this.formatting.offeredAnswer.qtnanswersetID = '886023B2-86B5-435B-9E35-C3AE113539F1';
-                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID,
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
                     this.formatting.offeredAnswer.answer = null;
                     this.formatting.offeredAnswer.answerOther = answerOther;
                     offeredAnswer.push(this.formatting.offeredAnswer.doSet());
@@ -1773,7 +1771,7 @@ class Questionnaire {
                     this.formatting.data = datasource.new.qtnanswers;
                     this.formatting.offeredAnswer.qtnquestionID = 'B307108F-63FF-4F3D-9034-02504D91717F';
                     this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
-                    this.formatting.offeredAnswer.qtnanswersetID = 'E896724A-D557-4FAA-89A3-0913BFD76AC6',
+                    this.formatting.offeredAnswer.qtnanswersetID = 'E896724A-D557-4FAA-89A3-0913BFD76AC6';
                     this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
                     this.formatting.offeredAnswer.answer = null;
                     this.formatting.offeredAnswer.answerOther = answerOther;
@@ -1847,7 +1845,7 @@ class Questionnaire {
                     this.formatting.offeredAnswer.qtnquestionID = '13C15528-8AE1-4776-ABE8-B194947CEF1D';
                     this.formatting.offeredAnswer.errorStatus = (qtnanswerID !== null ? 'N' : 'Y');
                     this.formatting.offeredAnswer.qtnanswersetID = '7CD6C46B-BAD8-4CEC-BFFA-9D5EFFCAA144';
-                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID,
+                    this.formatting.offeredAnswer.qtnanswerID = qtnanswerID;
                     this.formatting.offeredAnswer.answer = null;
                     this.formatting.offeredAnswer.answerOther = answerOther;
                     offeredAnswer.push(this.formatting.offeredAnswer.doSet());
