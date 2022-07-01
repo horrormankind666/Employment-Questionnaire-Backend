@@ -2,15 +2,16 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๓/๐๙/๒๕๖๔>
-Modify date : <๑๘/๐๔/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const sql = require('mssql');
-const util = require('../util');
+import sql from 'mssql';
+
+import util from '../util.js';
 
 class MSent {
     async doSet(jsonData) {
@@ -18,7 +19,7 @@ class MSent {
         let connRequest;
         
         try {
-            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_SYSTEM);
             connRequest = conn.request();
             connRequest.input('jsonData', sql.NVarChar, jsonData);
         }
@@ -38,4 +39,4 @@ class MSent {
     }
 }
 
-module.exports = new MSent;
+export default new MSent;

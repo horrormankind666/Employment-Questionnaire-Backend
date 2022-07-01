@@ -2,18 +2,18 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๗/๐๑/๒๕๖๕>
-Modify date : <๐๒/๐๕/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const atob = require('atob');
-const express = require('express');
-const http = require('http');
-const request = require('request');
-const util = require('../util');
+import atob from 'atob';
+import express from 'express';
+import request from 'request';
+
+import util from '../util.js';
 
 const router = express.Router();
 
@@ -51,7 +51,10 @@ router.post('/Get', (req, res, next) => {
     });
 });
 
-function replacer(key, value) {
+function replacer(
+    key,
+    value
+) {
     if (typeof value === 'string') {
         return (value.split('').reverse().join(''));
     }
@@ -59,4 +62,4 @@ function replacer(key, value) {
     return value
 }
 
-module.exports = router;
+export default router;

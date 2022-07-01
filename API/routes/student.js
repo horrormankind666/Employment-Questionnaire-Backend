@@ -2,16 +2,18 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๘/๐๑/๒๕๖๕>
-Modify date : <๐๓/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const express = require('express');
-const util = require('../util');
-const studentModel = require('../models/student');
+import express from 'express';
+
+import util from '../util.js';
+
+import studentModel from '../models/student.js';
 
 const router = express.Router();
 
@@ -24,4 +26,4 @@ router.get('/Get', (req, res, next) => {
         });
 });
 
-module.exports = router;
+export default router;

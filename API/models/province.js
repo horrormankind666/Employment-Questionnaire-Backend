@@ -2,16 +2,18 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๗/๑๐/๒๕๖๔>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const sql = require('mssql');
-const util = require('../util');
-const schema = require('./schema');
+import sql from 'mssql';
+
+import util from '../util.js';
+
+import schema from './schema.js';
 
 class Province {
     async doGetList() {
@@ -30,7 +32,7 @@ class Province {
         let ds = [];
         
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push(new schema.Province(
                     dr.id,
                     {
@@ -53,4 +55,4 @@ class Province {
     }
 }
 
-module.exports = new Province();
+export default new Province();

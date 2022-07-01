@@ -2,16 +2,17 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๒๘/๐๑/๒๕๖๕>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const sql = require('mssql');
-const util = require('../util');
-const schema = require('./schema');
+import sql from 'mssql';
+
+import util from '../util.js';
+import schema from './schema.js';
 
 class Student {
     async doGet(studentCode) {
@@ -19,7 +20,7 @@ class Student {
         let connRequest;
         
         try {
-            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_BERMUDA);
+            conn = await util.db.doGetConnectRequest(process.env.DB_DATABASE_SYSTEM);
             connRequest = conn.request();
             connRequest.input('studentCode', sql.VarChar, studentCode);
         }
@@ -30,7 +31,7 @@ class Student {
         let ds = [];
         
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push(new schema.Student(
                     dr.perPersonID,
                     dr.studentCode,
@@ -110,4 +111,4 @@ class Student {
     }
 }
 
-module.exports = new Student();
+export default new Student();

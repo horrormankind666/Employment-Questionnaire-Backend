@@ -2,35 +2,39 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๒/๐๔/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const cors = require('cors');
-const express = require('express');
-const bodyParser = require('body-parser');
-const util = require('./util');
-const studentModel = require('./models/student');
-const tokenRoute = require('./routes/token');
-const msentRoute = require('./routes/m-sent');
-const studentRoute = require('./routes/student');
-const careerRoute = require('./routes/career');
-const programRoute = require('./routes/program');
-const countryRoute = require('./routes/country');
-const provinceRoute = require('./routes/province');
-const districtRoute = require('./routes/district');
-const subdistrictRoute = require('./routes/subdistrict');
-const questionnaireDoneAndSetRoute = require('./routes/questionnaireDoneAndSet');
-const questionnaireDoneRoute = require('./routes/questionnaireDone');
-const { Router } = require('express');
+import cors from 'cors';
+import express from 'express';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
-require("dotenv").config();
+import util from './util.js';
+
+import studentModel from './models/student.js';
+
+import tokenRoute from './routes/token.js';
+import msentRoute from './routes/m-sent.js';
+import studentRoute from './routes/student.js';
+import careerRoute from './routes/career.js';
+import programRoute from './routes/program.js';
+import countryRoute from './routes/country.js';
+import provinceRoute from './routes/province.js';
+import districtRoute from './routes/district.js';
+import subdistrictRoute from './routes/subdistrict.js';
+import questionnaireDoneAndSetRoute from './routes/questionnaire/doneandset.js';
+import questionnaireResultRoute from './routes/questionnaire/result.js';
+import questionnaireDoneRoute from './routes/questionnaire/done.js';
 
 const app = express();
 const router = express.Router();
+
+dotenv.config();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -46,14 +50,8 @@ app.use((req, res, next) => {
         next();
     else {
         let authen = util.authorization.ADFS.doGetInfo(req);
-
+        
         if (authen.isAuthenticated) {
-            /*
-            authen.payload.ppid = '6005590';
-            6011258
-            6218041
-            4902045
-            */
             studentModel.doGet(authen.payload.ppid)
                 .then((result) => {
                     if (result.dataset.length > 0) {
@@ -97,8 +95,9 @@ router.use('/Country', countryRoute);
 router.use('/Province', provinceRoute);
 router.use('/District', districtRoute);
 router.use('/Subdistrict', subdistrictRoute);
-router.use('/DoneAndSet', questionnaireDoneAndSetRoute);
-router.use('/Done', questionnaireDoneRoute);
+router.use('/Questionnaire/DoneAndSet', questionnaireDoneAndSetRoute);
+router.use('/Questionnaire/Result', questionnaireResultRoute);
+router.use('/Questionnaire/Done', questionnaireDoneRoute);
 
 app.listen(process.env.PORT, () => {
     console.log('Server API is running at port %s', process.env.PORT);

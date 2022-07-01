@@ -2,16 +2,16 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๒/๑๑/๒๕๖๔>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const sql = require('mssql');
-const util = require('../util');
-const schema = require('./schema');
+import sql from 'mssql';
+import util from '../util.js';
+import schema from './schema.js';
 
 class District {
     async doGetList() {
@@ -30,7 +30,7 @@ class District {
         let ds = [];
         
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push(new schema.District(
                     dr.id,
                     {
@@ -60,4 +60,4 @@ class District {
     }
 }
 
-module.exports = new District();
+export default new District();

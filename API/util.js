@@ -2,26 +2,45 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๐/๐๙/๒๕๖๔>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const atob = require('atob');
-const fs = require('fs');
-const jwt = require('jsonwebtoken');
-const sql = require('mssql');
+import atob from 'atob';
+import fs from 'fs';
+import path from 'path';
+import jwt from 'jsonwebtoken';
+import sql from 'mssql';
+import dotenv from 'dotenv';
 
-require('dotenv').config();
+const __dirname = path.resolve();
+
+dotenv.config();
 
 class DB {
-    bermuda = { 
+    dev = {
         config: {
             user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
-            database: 'Bermuda',
+            database: process.env.DB_DATABASE_DB4DEV,
+            server: process.env.DB_SERVER,
+            pool: {
+                idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
+            },
+            options: {
+                encrypt: true,
+                trustServerCertificate: true
+            } 
+        }
+    };    
+    bermuda = {
+        config: {
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_DATABASE_BERMUDA,
             server: process.env.DB_SERVER,
             pool: {
                 idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
@@ -37,7 +56,7 @@ class DB {
         config: {
             user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
-            database: 'Infinity',
+            database: process.env.DB_DATABASE_INFINITY,
             server: process.env.DB_SERVER,
             pool: {
                 idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT)
@@ -53,12 +72,15 @@ class DB {
         let conn = null;
 
         try {
-            if (database === process.env.DB_DATABASE_INFINITY)
-                conn = await sql.connect(this.infinity.config);
-            
+            if (database === process.env.DB_DATABASE_DB4DEV)
+                conn = sql.connect(this.dev.config);
+
             if (database === process.env.DB_DATABASE_BERMUDA)
                 conn = await sql.connect(this.bermuda.config);
-
+                
+            if (database === process.env.DB_DATABASE_INFINITY)
+                conn = await sql.connect(this.infinity.config);
+        
             return conn;
         }
         catch {
@@ -139,7 +161,7 @@ class Authorization {
             let isAuthenticated = false;
             let payload = {};
             let message = '';
-
+            
             if (authorization) {
                 if (authorization.startsWith("Bearer ")) {
                     let bearerToken = authorization.substring("Bearer ".length).trim();
@@ -252,4 +274,4 @@ class Util {
     }
 }
 
-module.exports = new Util();
+export default new Util();

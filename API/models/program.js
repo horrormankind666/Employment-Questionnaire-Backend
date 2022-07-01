@@ -2,14 +2,14 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๑/๐๒/๒๕๖๕>
-Modify date : <๑๘/๐๒/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const util = require('../util');
+import util from '../util.js';
 
 class Program {
     async doGetList() {
@@ -32,7 +32,7 @@ class Program {
         let ds = [];
 
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push({
                     name: dr.name
                 });
@@ -46,4 +46,4 @@ class Program {
     }
 }
 
-module.exports = new Program();
+export default new Program();

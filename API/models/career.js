@@ -2,14 +2,14 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๑๑/๐๒/๒๕๖๕>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const util = require('../util');
+import util from '../util.js';
 
 class Career {
     async doGetList() {
@@ -35,7 +35,7 @@ class Career {
         let ds = [];
 
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push({
                     name: dr.name
                 });
@@ -49,4 +49,4 @@ class Career {
     }
 }
 
-module.exports = new Career();
+export default new Career();

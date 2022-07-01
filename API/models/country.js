@@ -2,16 +2,17 @@
 =============================================
 Author      : <ยุทธภูมิ ตวันนา>
 Create date : <๐๒/๑๑/๒๕๖๔>
-Modify date : <๑๘/๐๓/๒๕๖๕>
+Modify date : <๓๐/๐๖/๒๕๖๕>
 Description : <>
 =============================================
 */
 
 'use strict';
 
-const sql = require('mssql');
-const util = require('../util');
-const schema = require('./schema');
+import sql from 'mssql';
+
+import util from '../util.js';
+import schema from './schema.js';
 
 class Country {
     async doGetList() {
@@ -30,7 +31,7 @@ class Country {
         let ds = [];
         
         if (data.dataset.length > 0) {
-            data.dataset[0].forEach(dr => {
+            data.dataset[0].forEach((dr) => {
                 ds.push(new schema.Country(
                     dr.id,
                     {
@@ -50,4 +51,4 @@ class Country {
     }
 }
 
-module.exports = new Country();
+export default new Country();

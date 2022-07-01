@@ -17,10 +17,10 @@ class Schema {
             isoCountryCodes2Letter,
             isoCountryCodes3Letter
         ) {
-            this.ID = ID,
-            this.name = name,
-            this.isoCountryCodes2Letter = isoCountryCodes2Letter,
-            this.isoCountryCodes3Letter = isoCountryCodes3Letter
+            this.ID = ID;
+            this.name = name;
+            this.isoCountryCodes2Letter = isoCountryCodes2Letter;
+            this.isoCountryCodes3Letter = isoCountryCodes3Letter;
         }
     };
 
@@ -31,10 +31,10 @@ class Schema {
             name,
             regional
         ) {
-            this.ID = ID,
-            this.country = country,
-            this.name = name,
-            this.regional = regional
+            this.ID = ID;
+            this.country = country;
+            this.name = name;
+            this.regional = regional;
         }
     };
 
@@ -46,11 +46,11 @@ class Schema {
             name,
             zipCode
         ) {
-            this.ID = ID,
-            this.country = country,
-            this.province = province,
-            this.name = name,
-            this.zipCode = zipCode
+            this.ID = ID;
+            this.country = country;
+            this.province = province;
+            this.name = name;
+            this.zipCode = zipCode;
         }
     };
 
@@ -62,11 +62,11 @@ class Schema {
             district,
             name
         ) {
-            this.ID = ID,
-            this.country = country,
-            this.province = province,
-            this.district = district,
-            this.name = name
+            this.ID = ID;
+            this.country = country;
+            this.province = province;
+            this.district = district;
+            this.name = name;
         }
     }
 
@@ -112,13 +112,13 @@ class Schema {
             actionDate,
             doneDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.userInfo = userInfo,
-            this.submitStatus = submitStatus,
-            this.cancelStatus = cancelStatus,
-            this.actionDate = actionDate,
-            this.doneDate = doneDate
+            this.ID = ID;
+            this.empQuestionnaireSetID = empQuestionnaireSetID;
+            this.userInfo = userInfo;
+            this.submitStatus = submitStatus;
+            this.cancelStatus = cancelStatus;
+            this.actionDate = actionDate;
+            this.doneDate = doneDate;
         }
     };
 
@@ -132,13 +132,13 @@ class Schema {
             answer,
             actionDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireDoneID = empQuestionnaireDoneID,
-            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID,
-            this.errorStatus = errorStatus,
-            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
-            this.answer = answer,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.empQuestionnaireDoneID = empQuestionnaireDoneID;
+            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID;
+            this.errorStatus = errorStatus;
+            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID;
+            this.answer = answer;
+            this.actionDate = actionDate;
         }
     };
 
@@ -156,17 +156,17 @@ class Schema {
             doneDate,
             actionDate
         ) {
-            this.ID = ID,
-            this.year = year,
-            this.name = name,
-            this.description = description,
-            this.notice = notice,
-            this.showStatus = showStatus,
-            this.cancelStatus = cancelStatus,
-            this.empQuestionnaireDoneID = empQuestionnaireDoneID,
-            this.submitStatus = submitStatus,
-            this.doneDate= doneDate,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.year = year;
+            this.name = name;
+            this.description = description;
+            this.notice = notice;
+            this.showStatus = showStatus;
+            this.cancelStatus = cancelStatus;
+            this.empQuestionnaireDoneID = empQuestionnaireDoneID;
+            this.submitStatus = submitStatus;
+            this.doneDate= doneDate;
+            this.actionDate = actionDate;
         }
     };
 
@@ -180,13 +180,13 @@ class Schema {
             disableStatus,
             actionDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireSetID = empQuestionnaireSetID,
-            this.no = no,
-            this.titleName = titleName,
-            this.name = name,
-            this.disableStatus = disableStatus,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.empQuestionnaireSetID = empQuestionnaireSetID;
+            this.no = no;
+            this.titleName = titleName;
+            this.name = name;
+            this.disableStatus = disableStatus;
+            this.actionDate = actionDate;
         }
     };
 
@@ -200,13 +200,13 @@ class Schema {
             condition,
             actionDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireSectionID = empQuestionnaireSectionID,
-            this.no = no,
-            this.name = name,
-            this.description = description,
-            this.condition = condition,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.empQuestionnaireSectionID = empQuestionnaireSectionID;
+            this.no = no;
+            this.name = name;
+            this.description = description;
+            this.condition = condition;
+            this.actionDate = actionDate;
         }
     };
 
@@ -219,12 +219,12 @@ class Schema {
             inputType,
             actionDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID,
-            this.no = no,
-            this.titleName = titleName,
-            this.inputType = inputType,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.empQuestionnaireQuestionID = empQuestionnaireQuestionID;
+            this.no = no;
+            this.titleName = titleName;
+            this.inputType = inputType;
+            this.actionDate = actionDate;
         }
     };
 
@@ -241,20 +241,20 @@ class Schema {
             eventAction,
             actionDate
         ) {
-            this.ID = ID,
-            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID,
-            this.no = no,
-            this.choiceOrder = choiceOrder,
-            this.name = name,
-            this.description = description,
-            this.inputType = inputType,
-            this.specify = specify,
-            this.eventAction = eventAction,
-            this.actionDate = actionDate
+            this.ID = ID;
+            this.empQuestionnaireAnswerSetID = empQuestionnaireAnswerSetID;
+            this.no = no;
+            this.choiceOrder = choiceOrder;
+            this.name = name;
+            this.description = description;
+            this.inputType = inputType;
+            this.specify = specify;
+            this.eventAction = eventAction;
+            this.actionDate = actionDate;
         }
     };
 
-    QuestionnaireDoneAndSet = class {
+    Questionnaire = class {
         constructor(
             done,
             answered,
@@ -264,13 +264,13 @@ class Schema {
             answersets,
             answers
         ) {
-            this.done = done,
-            this.answered = answered,
-            this.set = set,
-            this.sections = sections,
-            this.questions = questions,
-            this.answersets = answersets,
-            this.answers = answers
+            this.done = done;
+            this.answered = answered;
+            this.set = set;
+            this.sections = sections;
+            this.questions = questions;
+            this.answersets = answersets;
+            this.answers = answers;
         }
     };
 
@@ -308,39 +308,39 @@ class Schema {
 			race2Letter,
 			race3Letter
         ) {
-            this.perPersonID = perPersonID,
-			this.studentCode = studentCode,
-			this.IDCard = IDCard,
-			this.titlePrefix = titlePrefix,
-			this.firstName = firstName,
-			this.middleName = middleName,
-			this.lastName = lastName,
-			this.instituteName = instituteName,
-			this.facultyID = facultyID,
-			this.facultyCode = facultyCode,
-			this.facultyName = facultyName,
-			this.programID = programID,
-			this.programCode = programCode,
-			this.majorCode = majorCode,
-			this.groupNum = groupNum,
-			this.degreeLevelName = degreeLevelName,
-			this.programName = programName,
-			this.degreeName = degreeName,
-			this.branchID = branchID,
-			this.branchName = branchName,
-			this.classYear = classYear,
-			this.yearEntry = yearEntry,
-            this.graduateYear = graduateYear,
-			this.gender = gender,
-			this.birthDate = birthDate,
-			this.nationalityName = nationalityName,
-			this.nationality2Letter = nationality2Letter,
-			this.nationality3Letter = nationality3Letter,
-			this.raceName = raceName,
-			this.race2Letter = race2Letter,
-			this.race3Letter = race3Letter
+            this.perPersonID = perPersonID;
+			this.studentCode = studentCode;
+			this.IDCard = IDCard;
+			this.titlePrefix = titlePrefix;
+			this.firstName = firstName;
+			this.middleName = middleName;
+			this.lastName = lastName;
+			this.instituteName = instituteName;
+			this.facultyID = facultyID;
+			this.facultyCode = facultyCode;
+			this.facultyName = facultyName;
+			this.programID = programID;
+			this.programCode = programCode;
+			this.majorCode = majorCode;
+			this.groupNum = groupNum;
+			this.degreeLevelName = degreeLevelName;
+			this.programName = programName;
+			this.degreeName = degreeName;
+			this.branchID = branchID;
+			this.branchName = branchName;
+			this.classYear = classYear;
+			this.yearEntry = yearEntry;
+            this.graduateYear = graduateYear;
+			this.gender = gender;
+			this.birthDate = birthDate;
+			this.nationalityName = nationalityName;
+			this.nationality2Letter = nationality2Letter;
+			this.nationality3Letter = nationality3Letter;
+			this.raceName = raceName;
+			this.race2Letter = race2Letter;
+			this.race3Letter = race3Letter;
         }
     }
 }
 
-module.exports = new Schema();
+export default new Schema();
