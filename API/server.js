@@ -45,17 +45,17 @@ app.use(bodyParser.urlencoded({
 app.use((req, res, next) => {
     let urls = (req.url.split('/'));
     let url = (urls.length > 2 ? urls[2] : '');
-
+    
     if (['Token', 'M-Sent'].filter((route) => route === url).length > 0)
         next();
-    else {
+    else {    
         let authen = util.authorization.ADFS.doGetInfo(req);
-        
+    
         if (authen.isAuthenticated) {
-            studentModel.doGet(authen.payload.ppid)
+            studentModel.doGet('')
                 .then((result) => {
                     if (result.dataset.length > 0) {
-                        if (url === 'Student') 
+                        if (url === 'Student')
                             res.send(util.doGetAPIMessage(authen.statusCode, result.dataset, authen.message));
                         else {
                             req.payload = authen.payload;
@@ -76,6 +76,7 @@ app.use((req, res, next) => {
             res.send(util.doGetAPIMessage(authen.statusCode, [], authen.message));
     }
 });
+
 app.use('/API', router);
 
 app.get('/', (req, res) => {
