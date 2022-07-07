@@ -50,9 +50,9 @@ app.use((req, res, next) => {
         next();
     else {    
         let authen = util.authorization.ADFS.doGetInfo(req);
-    
+            
         if (authen.isAuthenticated) {
-            studentModel.doGet('')
+            studentModel.doGet(authen.payload.ppid)
                 .then((result) => {
                     if (result.dataset.length > 0) {
                         if (url === 'Student')
